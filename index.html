@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Maintenance Mode</title>
+    
+    <!-- Telegram Script -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Icons & Fonts -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #05060a;
+            --neon-gold: #ffd700;
+            --text-main: #ffffff;
+            --text-muted: #b0b0b0;
+            --font-head: 'Orbitron', sans-serif;
+            --font-body: 'Rajdhani', sans-serif;
+        }
+
+        body {
+            margin: 0; padding: 0;
+            font-family: var(--font-body);
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.05), transparent 60%),
+                linear-gradient(180deg, #05060a 0%, #0f1221 100%);
+        }
+
+        .bg-particles {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            z-index: -1;
+        }
+
+        /* Modal Design */
+        .cyber-modal {
+            background: rgba(16, 20, 35, 0.95);
+            border: 1px solid var(--neon-gold);
+            width: 80%;
+            max-width: 350px;
+            padding: 40px 25px;
+            text-align: center;
+            position: relative;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            box-shadow: none; /* Shadow removed */
+            clip-path: polygon(
+                20px 0, 100% 0, 
+                100% calc(100% - 20px), 
+                calc(100% - 20px) 100%, 
+                0 100%, 0 20px
+            );
+            animation: modalPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Icon Design (No Glow) */
+        .modal-main-icon {
+            font-size: 3.5rem;
+            color: var(--neon-gold);
+            margin-bottom: 20px;
+            text-shadow: none; /* Glow removed */
+        }
+
+        /* Keep rotation for 'updating' feel, but no pulse */
+        .modal-main-icon i {
+            display: inline-block;
+            animation: rotateGear 4s infinite linear;
+        }
+
+        /* Title */
+        h2 {
+            margin: 0 0 15px 0;
+            font-family: var(--font-head);
+            font-size: 1.4rem;
+            color: var(--neon-gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: none; /* Text glow removed */
+        }
+
+        /* Description */
+        p {
+            margin: 0 0 25px 0;
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--text-muted);
+        }
+
+        /* Button Design */
+        .cyber-btn-exit {
+            background: linear-gradient(135deg, #ff4d4d, #c0392b);
+            border: none;
+            color: white;
+            padding: 14px;
+            width: 100%;
+            font-family: var(--font-head);
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            transition: transform 0.2s;
+        }
+
+        .cyber-btn-exit:active {
+            transform: scale(0.96);
+            background: #a93226;
+        }
+
+        .cyber-btn-exit i {
+            margin-right: 8px;
+        }
+
+        /* Simple shine effect on button */
+        .cyber-btn-exit::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: skewX(-25deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { left: -150%; }
+            20% { left: 150%; }
+            100% { left: 150%; }
+        }
+
+        @keyframes rotateGear {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes modalPop {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-particles"></div>
+
+    <div class="cyber-modal">
+        <!-- Icon (Spinning only) -->
+        <div class="modal-main-icon">
+            <i class="fas fa-cog"></i>
+        </div>
+
+        <!-- Title -->
+        <h2>Mini App Updating...</h2>
+        
+        <!-- Description -->
+        <p>
+            আপনারা সবাই আজকের জন্য আমাদের সময় দিন কারণ মিনি অ্যাপটি আপডেট করা হচ্ছে, 
+            কারণ মিনি অ্যাপের কিছু সমস্যা সমাধান করা হচ্ছে, আশা করি সবাই ধৈর্য ধরে অপেক্ষা করবেন।
+        </p>
+        
+        <!-- Action Button -->
+        <button class="cyber-btn-exit" onclick="closeMiniApp()">
+            <i class="fas fa-sign-out-alt"></i> Exit and Wait
+        </button>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        function closeMiniApp() {
+            if (tg) {
+                tg.close();
+            } else {
+                window.close();
+            }
+        }
+    </script>
+
+</body>
+</html>
