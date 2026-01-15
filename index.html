@@ -1,0 +1,3308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Candy Fruit</title>
+    
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+    <!-- Onclicka SDK Removed -->
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        
+:root {
+    --bg-dark: #05060a;
+    --bg-panel: rgba(20, 25, 45, 0.6);
+    --neon-blue: #00f0ff;
+    --neon-purple: #bc13fe;
+    --neon-gold: #ffd700;
+    --text-main: #ffffff;
+    --text-muted: #8b9bb4;
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --font-head: 'Orbitron', sans-serif;
+    --font-body: 'Rajdhani', sans-serif;
+    --neon-aqua: #09F2FF;
+    --neon-uv-purple: #C542FF;
+    --neon-plasma-gold: #F8C85F;
+}
+
+body {
+    margin: 0; padding: 0;
+    font-family: var(--font-body);
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    overflow-x: hidden;
+    padding-bottom: 100px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#loader-screen {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #05060a; z-index: 9999;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    overflow: hidden;
+    transition: all 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+#loader-screen.loaded {
+    opacity: 0;
+    transform: scale(2);
+    filter: blur(20px);
+    pointer-events: none;
+}
+
+.loader-bg-aurora {
+    position: absolute; width: 200%; height: 200%;
+    background: radial-gradient(circle at 50% 50%, rgba(0, 240, 255, 0.1), transparent 60%),
+                radial-gradient(circle at 80% 20%, rgba(0, 255, 170, 0.08), transparent 50%);
+    animation: auroraMove 15s infinite alternate linear;
+    z-index: 1;
+}
+@keyframes auroraMove { 
+    0% { transform: translate(-20%, -20%) rotate(0deg); } 
+    100% { transform: translate(10%, 10%) rotate(10deg); } 
+}
+
+.loader-orbit-box {
+    position: relative; 
+    width: 55vw;
+    height: 55vw;
+    max-width: 180px; max-height: 180px;
+    display: flex; justify-content: center; align-items: center;
+    z-index: 10;
+    margin-bottom: 20px;
+}
+
+.loader-ring-outer {
+    position: absolute; width: 100%; height: 100%;
+    border-radius: 50%; 
+    border: 3px dashed rgba(0, 240, 255, 0.5);
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+    animation: spin 10s linear infinite;
+}
+
+.loader-ring-inner {
+    position: absolute; width: 80%; height: 80%;
+    border-radius: 50%; 
+    border: 2px solid transparent;
+    border-top: 2px solid var(--neon-purple);
+    border-bottom: 2px solid var(--neon-purple);
+    animation: spinReverse 6s linear infinite;
+    box-shadow: 0 0 10px rgba(188, 19, 254, 0.3);
+}
+
+.loader-core-logo {
+    font-size: 4rem; 
+    color: #fff;
+    z-index: 2;
+    text-shadow: 0 0 20px var(--neon-blue);
+    animation: bounce 3s infinite ease-in-out;
+    margin-top: 30px;
+}
+
+.loader-text-wrapper {
+    position: relative; z-index: 10;
+    text-align: center;
+    display: flex; flex-direction: column;
+}
+
+#progressText {
+    font-family: var(--font-head); 
+    font-size: 2rem; 
+    font-weight: bold;
+    color: #fff; 
+    text-shadow: 0 0 10px var(--neon-blue);
+}
+
+.loading-label {
+    font-family: var(--font-body); 
+    font-size: 0.8rem; 
+    letter-spacing: 3px;
+    color: var(--neon-purple); 
+    text-transform: uppercase; 
+    margin-top: 5px;
+    animation: blink 1s infinite;
+}
+
+.flash-burst {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: white; opacity: 0; pointer-events: none; z-index: 10000;
+}
+.flash-active { animation: flashAnim 0.3s ease-out; }
+
+@keyframes flashAnim { 0% { opacity: 0.8; } 100% { opacity: 0; } }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes spinReverse { 0% { transform: rotate(360deg); } 100% { transform: rotate(-360deg); } }
+@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes blink { 50% { opacity: 0.5; } }
+
+
+.bg-particles {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(180deg, #03020A 0%, #0C0F33 100%);
+    z-index: -2;
+}
+.bg-glow {
+    position: fixed; top: -20%; left: -20%; width: 50%; height: 50%;
+    background: radial-gradient(circle, rgba(0, 240, 255, 0.15), transparent 70%);
+    filter: blur(80px); z-index: -1; animation: floatGlowBG 10s infinite alternate;
+}
+@keyframes floatGlowBG { 0% { transform: translate(0,0); } 100% { transform: translate(20px, 20px); } }
+
+.cyber-header {
+    display: flex; justify-content: space-between; padding: 20px;
+    position: relative; z-index: 10;
+}
+.cyber-badge {
+    background: rgba(0, 240, 255, 0.1);
+    border: 1px solid var(--neon-blue);
+    padding: 5px 12px; border-radius: 4px;
+    font-size: 0.8rem; font-weight: 700;
+    color: var(--neon-blue);
+    text-shadow: 0 0 5px var(--neon-blue);
+    backdrop-filter: blur(5px);
+}
+
+.balance-orbit-container {
+    position: relative; 
+    width: 160px; 
+    height: 160px;
+    margin: 10px auto 30px; 
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+}
+.orbit-ring {
+    position: absolute; width: 100%; height: 100%;
+    border-radius: 50%; border: 2px dashed rgba(0, 240, 255, 0.3);
+    animation: spin 10s linear infinite;
+}
+.orbit-ring-2 {
+    position: absolute; width: 80%; height: 80%;
+    border-radius: 50%; border: 1px solid rgba(188, 19, 254, 0.3);
+    border-top-color: var(--neon-purple);
+    animation: spinReverse 6s linear infinite;
+}
+.balance-core {
+    text-align: center; z-index: 2;
+    position: relative;
+}
+
+.coin-hologram {
+    font-size: 2rem; 
+    color: var(--neon-gold); 
+    filter: drop-shadow(0 0 10px var(--neon-gold)); 
+    margin-bottom: 1px; 
+    animation: none; 
+}
+
+#balance {
+    font-family: var(--font-head);
+    font-size: 2rem;           
+    font-weight: 900;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 1;
+    width: 100%;
+    max-width: 120px;          
+    margin: 0 auto;
+    white-space: nowrap;       
+    overflow: hidden;          
+    text-overflow: clip;       
+    transition: font-size 0.2s ease, transform 0.1s; 
+}
+
+.usd-label {
+    font-size: 0.9rem;
+    color: #2ecc71;
+    font-family: 'Rajdhani', monospace;
+    font-weight: 700;
+    margin-top: 0px;
+    margin-bottom: 2px;
+    text-shadow: 0 0 8px rgba(46, 204, 113, 0.4);
+    letter-spacing: 1px;
+    opacity: 0.9;
+}
+
+.balance-label 
+{ 
+    font-size: 0.7rem; letter-spacing: 2px; color: var(--neon-blue); margin-top: 2px; opacity: 0.8; 
+    
+}
+
+.cyber-tabs {
+    display: flex; gap: 10px; padding: 5px;
+    background: rgba(0,0,0,0.3); border-radius: 12px; margin-bottom: 20px;
+}
+
+.cyber-tab {
+    flex: 1; 
+    padding: 10px;
+    font-family: var(--font-head); font-size: 0.75rem;
+    color: var(--text-muted); cursor: pointer;
+    border: 1px solid rgba(139, 155, 180, 0.4); 
+    border-radius: 8px;
+    transition: all 0.3s;
+    
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    gap: 3px; 
+    
+    display: none; 
+}
+
+.cyber-tab.active {
+    background: rgba(0, 240, 255, 0.15);
+    border-color: var(--neon-blue);
+    color: var(--neon-blue);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+}
+
+.glass-panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px; padding: 20px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    margin-bottom: 20px; position: relative; overflow: hidden;
+    transition: transform 0.3s;
+}
+.glass-panel::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--neon-purple), transparent);
+}
+
+.panel-icon { text-align: center; color: var(--neon-purple); margin-bottom: 10px; filter: drop-shadow(0 0 5px var(--neon-purple)); }
+h3 { margin: 5px 0; font-family: var(--font-head); font-weight: 700; color: white; text-align: center; letter-spacing: 1px; }
+p { color: var(--text-muted); font-size: 0.9rem; text-align: center; margin-top: 0; }
+.neon-text { color: var(--neon-blue); text-shadow: 0 0 5px var(--neon-blue); }
+
+
+.trophy-holo, 
+.vault-icon {
+    display: flex;            
+    justify-content: center;  
+    align-items: center;      
+    width: 100%;              
+    margin: 0 auto 20px auto; 
+    text-align: center;
+}
+
+.trophy-holo { 
+    color: var(--neon-blue);  
+    filter: drop-shadow(0 0 15px rgba(0, 240, 255, 0.6)); 
+}
+
+.vault-icon { 
+    color: var(--neon-blue); 
+    filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.5));
+    transition: transform 0.3s ease;
+}
+.vault-icon:hover {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.8));
+}
+
+@keyframes floatGlow {
+    0%, 100% { transform: translateY(0); filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.4)); }
+    50% { transform: translateY(-5px); filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.8)); }
+}
+
+
+.cyber-progress-box { margin: 20px 0; }
+.progress-info { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px; font-family: var(--font-head); }
+.neon-track { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
+.neon-bar {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
+    box-shadow: 0 0 10px var(--neon-blue);
+    transition: width 0.5s ease;
+}
+
+.cyber-btn-glitch {
+    background: transparent; border: 1px solid var(--neon-blue);
+    color: var(--neon-blue); padding: 12px; width: 100%;
+    font-family: var(--font-head); font-weight: 700; letter-spacing: 1px;
+    cursor: pointer; position: relative; overflow: hidden;
+    transition: 0.2s; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+.cyber-btn-glitch:active { transform: scale(0.98); background: rgba(0, 240, 255, 0.1); }
+.cyber-btn-glitch.disabled { border-color: #555; color: #555; pointer-events: none; }
+.flare {
+    position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: flareAnim 3s infinite;
+}
+@keyframes flareAnim { 0% { left: -100%; } 20% { left: 200%; } 100% { left: 200%; } }
+
+.holo-btn-mini {
+    position: absolute; top: 10px; right: 10px;
+    background: rgba(0,0,0,0.5); border: 1px solid var(--text-muted);
+    color: var(--text-muted); padding: 4px 10px; font-size: 0.7rem;
+    border-radius: 4px; font-family: var(--font-head); cursor: pointer;
+    z-index: 100;
+}
+
+.cyber-btn-small {
+    background: linear-gradient(135deg, var(--neon-purple), #8a00d4);
+    color: white; 
+    border: none; 
+    padding: 10px 20px;
+    font-family: var(--font-head); 
+    font-size: 0.8rem;
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    cursor: pointer; 
+    box-shadow: 0 0 15px rgba(188, 19, 254, 0.4);
+    
+    min-width: 90px;        
+    display: inline-flex;   
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+.btn-blue { background: linear-gradient(135deg, #0088cc, #005f8f); box-shadow: 0 0 15px rgba(0, 136, 204, 0.4); }
+
+.mission-capsule {
+    background: rgba(255, 255, 255, 0.03); border-left: 3px solid var(--neon-purple);
+    padding: 15px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between;
+    backdrop-filter: blur(5px);
+}
+.capsule-left { display: flex; align-items: center; gap: 15px; }
+.capsule-icon { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: rgba(188, 19, 254, 0.1); border-radius: 50%; color: var(--neon-purple); }
+.capsule-info h4 { text-align: left; margin: 0; font-size: 0.9rem; color: white; }
+.capsule-info p { text-align: left; font-size: 0.75rem; color: var(--text-muted); }
+
+.leaderboard-grid { max-height: 400px; overflow-y: auto; }
+.top-ref-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.active-user-highlight { border: 1px solid var(--neon-gold); background: rgba(255, 215, 0, 0.1); }
+.ref-rank-badge { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; }
+
+.ref-info {
+    flex: 1; 
+    margin-left: 2px; 
+    margin-right: 12px; 
+    text-align: left;
+    overflow: hidden;
+}
+
+.ref-info h4 { 
+    text-align: left; 
+    font-size: 0.9rem; 
+    margin: 0;
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis;
+}
+
+.ref-count-pill { 
+    background: rgba(0, 240, 255, 0.1); 
+    color: var(--neon-blue); 
+    padding: 5px 10px; 
+    border-radius: 4px; 
+    font-family: var(--font-head); 
+    text-align: center; 
+    min-width: 60px;
+    flex-shrink: 0;
+    font-size: 0.8rem;
+}
+
+.split-stats { display: flex; gap: 10px; margin-bottom: 20px; }
+.stat-block { flex: 1; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+.stat-block i { font-size: 1.5rem; color: var(--neon-blue); margin-bottom: 5px; }
+
+.stat-block h3 {
+    margin: 0; 
+    font-size: 1.2rem;
+    color: white; 
+    
+    white-space: nowrap;       
+    overflow: hidden;          
+    text-overflow: clip;       
+    display: flex;             
+    justify-content: center;
+    align-items: center;
+    width: 100%;               
+    transition: font-size 0.2s ease;
+}
+.link-vault { background: rgba(0,0,0,0.5); border: 1px dashed var(--text-muted); padding: 10px; border-radius: 4px; margin-bottom: 15px; position: relative; }
+.vault-label { position: absolute; top: -10px; left: 10px; background: var(--bg-dark); padding: 0 5px; font-size: 0.6rem; color: var(--neon-blue); }
+.vault-text { font-family: monospace; color: var(--text-muted); word-break: break-all; font-size: 0.8rem; }
+
+.cyber-input-group { margin-bottom: 15px; text-align: left; position: relative; }
+.cyber-input-group label { display: block; font-size: 0.7rem; color: var(--neon-blue); margin-bottom: 5px; font-family: var(--font-head); }
+.cyber-input {
+    width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border);
+    color: white; padding: 12px; border-radius: 4px; font-family: var(--font-body); font-size: 1rem;
+    outline: none; box-sizing: border-box;
+}
+.cyber-input:focus { border-color: var(--neon-blue); box-shadow: 0 0 10px rgba(0, 240, 255, 0.1); }
+
+.cyber-nav {
+    position: fixed; bottom: 20px; left: 5%; width: 90%;
+    background: rgba(10, 15, 30, 0.9); border: 1px solid var(--glass-border);
+    backdrop-filter: blur(15px); border-radius: 20px;
+    display: flex; justify-content: space-around; padding: 10px 0;
+    z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.nav-item { text-align: center; color: var(--text-muted); transition: 0.3s; width: 25%; /* 4 items * 25% */ cursor: pointer; }
+.nav-icon { font-size: 1.2rem; margin-bottom: 2px; transition: 0.3s; }
+.nav-item span { font-size: 0.6rem; font-family: var(--font-head); text-transform: uppercase; }
+.nav-item.active { color: var(--neon-blue); text-shadow: 0 0 8px var(--neon-blue); }
+.nav-item.active .nav-icon { transform: translateY(-3px); }
+
+.modal-backdrop {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9); 
+    backdrop-filter: blur(8px);
+    z-index: 3000;
+    display: none; justify-content: center; align-items: center;
+}
+.cyber-modal {
+    background: #0b1021; border: 1px solid var(--neon-blue);
+    width: 85%; max-width: 350px; padding: 30px 20px;
+    text-align: center; position: relative;
+    box-shadow: 0 0 30px rgba(0, 240, 255, 0.1);
+    clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
+    
+    animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes modalPop {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.large-modal { max-width: 450px; height: 80vh; display: flex; flex-direction: column; }
+
+.network-modal-style {
+    max-width: 400px;
+    height: auto;
+    max-height: 90vh;
+    padding: 20px;
+}
+.modal-scroll-area {
+    overflow-y: auto; 
+    padding: 10px 0; 
+    flex-grow: 1;
+}
+
+.history-scroll-area { overflow-y: auto; flex-grow: 1; }
+.close-modal, .close-modal-icon { position: absolute; top: 15px; right: 15px; color: #555; cursor: pointer; font-size: 1.2rem; }
+.close-modal-icon:hover { color: #fff; transform: scale(1.1); }
+
+.loader-ring { width: 50px; height: 50px; border: 4px solid rgba(0, 240, 255, 0.3); border-top-color: var(--neon-blue); border-radius: 50%; animation: spin 1s infinite linear; margin: 0 auto 20px; }
+.ad-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #05060a; z-index: 5000; display: none; flex-direction: column; justify-content: center; align-items: center; color: var(--neon-blue); font-family: var(--font-head); }
+.blink-text { animation: blink 1s infinite; }
+
+.neon-title { font-family: var(--font-head); font-size: 1rem; color: var(--text-muted); margin: 30px 0 10px; display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 1px; }
+.neon-title .line { height: 1px; background: rgba(255,255,255,0.1); flex-grow: 1; }
+.container, .cyber-container { padding: 0 20px; position: relative; z-index: 5; }
+.page-section { display: none; animation: fadeIn 0.4s; }
+.page-section.active-section { display: block; }
+.ad-card-container { display: none; }
+.ad-card-container.active { display: block; animation: slideUp 0.4s; }
+.success-msg { color: #2ecc71; font-family: var(--font-head); font-size: 0.8rem; margin-top: 10px; display: none; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+
+.img1
+{
+    width: 140px;
+}
+
+@keyframes universalFlare {
+    0% { left: -150%; }
+    10% { left: 150%; }
+    100% { left: 150%; }
+}
+
+.holo-btn-mini, 
+.cyber-btn-small
+{
+    position: relative !important;
+    overflow: hidden !important;
+    z-index: 1;
+}
+
+.holo-btn-mini::after, 
+.cyber-btn-small::after
+{
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 80%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transform: skewX(-25deg);
+    pointer-events: none;
+    animation: universalFlare 5s infinite linear; 
+}
+
+.cyber-btn-glitch:not(#watchAdBtn):not(#watchAdsgramBtn) {
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.cyber-btn-glitch:not(#watchAdBtn):not(#watchAdsgramBtn)::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 50%; 
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transform: skewX(-25deg);
+    pointer-events: none;
+    animation: universalFlare 3s infinite linear;
+}
+
+button:disabled::after,
+.cyber-btn-glitch.disabled::after,
+.cyber-btn-small.disabled::after,
+.holo-btn-mini:disabled::after
+{
+    display: none !important;
+}
+
+.holo-btn-mini {
+    position: absolute !important; 
+    top: 10px !important;
+    right: 10px !important;
+    z-index: 100 !important;
+}
+
+.ref-rank-badge i {
+    font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+    font-weight: 900 !important;
+}
+
+.flying-coin {
+    position: fixed;
+    width: 16px;
+    height: 16px;
+    background: radial-gradient(circle at 30% 30%, #ffd700, #ff8c00);
+    border-radius: 50%;
+    box-shadow: 0 0 10px #ffd700, 0 0 20px #ff8c00;
+    z-index: 10000;
+    pointer-events: none;
+    will-change: transform, opacity;
+}
+
+.neon-smoke {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    background: rgba(255, 215, 0, 0.6);
+    border-radius: 50%;
+    box-shadow: 0 0 10px #ff8c00;
+    pointer-events: none;
+    z-index: 9999;
+    animation: fadeSmoke 0.6s linear forwards;
+}
+@keyframes fadeSmoke {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(2); opacity: 0; }
+}
+
+.balance-sparkle {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    margin: auto;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid #ffd700;
+    box-shadow: 0 0 30px #ffd700, inset 0 0 15px #ffd700;
+    animation: impactRipple 0.5s ease-out forwards;
+    pointer-events: none;
+    z-index: 15;
+}
+@keyframes impactRipple {
+    0% { transform: scale(0.8); opacity: 1; border-width: 5px; }
+    100% { transform: scale(1.6); opacity: 0; border-width: 0px; }
+}
+
+.counting-sparkle {
+    animation: countingPulse 0.15s infinite alternate; 
+    color: #fffacd !important;
+    text-shadow: 
+        0 0 15px #ffd700, 
+        0 0 30px #ffffff,
+        0 0 50px #ff8c00;
+}
+
+@keyframes countingPulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.2); }
+}
+
+.modal-main-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: bounce 3s infinite ease-in-out; 
+    filter: none; 
+    text-shadow: none;
+}
+
+.text-cyan { 
+    color: #00f0ff !important; 
+    text-shadow: none !important; 
+}
+
+.text-gold { 
+    color: #ffd700 !important; 
+    text-shadow: none !important; 
+}
+
+.text-red { 
+    color: #ff4d4d !important; 
+    text-shadow: none !important; 
+}
+
+.reward-title {
+    font-size: 1.5rem;
+    font-weight: 900;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.reward-amount-text {
+    font-size: 2.2rem;
+    font-weight: bold;
+    margin: 5px 0 15px 0;
+    font-family: var(--font-head);
+}
+
+@keyframes bounce { 
+    0%, 100% { transform: translateY(0); } 
+    50% { transform: translateY(-10px); } 
+}
+
+.cyber-btn-small {
+    min-width: 90px;        
+    display: inline-flex;   
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.btn-claim {
+    background: linear-gradient(135deg, #2ecc71, #27ae60) !important;
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.6) !important;
+    color: #fff !important;
+}
+
+.btn-visit {
+    background: linear-gradient(135deg, var(--neon-gold), #cc9900) !important;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6) !important;
+    color: #000 !important;
+    font-weight: 700;
+}
+
+.cyber-btn-small.disabled {
+    background: #333 !important;
+    color: #777 !important;
+    box-shadow: none !important;
+    cursor: not-allowed;
+    border: 1px solid #444;
+}
+
+.custom-select-trigger {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+.custom-select-trigger:active {
+    border-color: var(--neon-aqua);
+    box-shadow: 0 0 10px rgba(9, 242, 255, 0.2);
+}
+
+.panel-header {
+    font-family: var(--font-head);
+    font-size: 0.8rem;
+    color: var(--neon-uv-purple);
+    padding: 10px 15px;
+    border-bottom: 1px solid rgba(197, 66, 255, 0.2);
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+.network-options-container {
+    padding: 10px 0; 
+    overflow-y: visible;
+}
+
+.network-option-capsule {
+    position: relative;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: var(--font-head);
+    color: var(--text-main);
+    text-align: center;
+    transition: all 0.2s ease-out;
+    overflow: hidden;
+    
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+@keyframes capsuleIn {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.network-option-capsule:hover {
+    background: rgba(9, 242, 255, 0.1);
+    border-color: var(--neon-aqua);
+    box-shadow: 0 0 15px rgba(9, 242, 255, 0.3);
+    transform: translateY(-2px) scale(1.01);
+}
+
+.network-option-capsule.selected {
+    background: rgba(197, 66, 255, 0.15);
+    border-color: var(--neon-uv-purple);
+    box-shadow: 0 0 20px rgba(197, 66, 255, 0.5);
+    color: var(--neon-aqua);
+    transform: none;
+    animation: pulseBorder 1.5s infinite alternate;
+}
+
+.network-option-capsule.selected::after {
+    content: '';
+    position: absolute;
+    top: -5px; bottom: -5px; left: -5px; right: -5px;
+    border: 2px dashed var(--neon-aqua);
+    border-radius: 12px;
+    opacity: 0.5;
+    animation: spin 6s linear infinite;
+    z-index: 0;
+}
+
+@keyframes pulseBorder {
+    0% { box-shadow: 0 0 20px rgba(197, 66, 255, 0.5); }
+    100% { box-shadow: 0 0 30px rgba(197, 66, 255, 0.8), 0 0 10px var(--neon-uv-purple); }
+}
+
+.capsule-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+    z-index: 1;
+}
+
+.capsule-icon-holo {
+    color: var(--neon-plasma-gold);
+    text-shadow: 0 0 5px var(--neon-plasma-gold);
+}
+
+.fa-caret-down {
+    transition: transform 0.3s ease;
+}
+.fa-rotate-180 {
+    transform: rotate(180deg);
+}
+
+#workVideoButton {
+    position: absolute; 
+    top: -10px;
+    left: -10px;
+    right: auto;
+    
+    background: rgba(0,0,0,0.5); 
+    border: 1px solid var(--neon-purple);
+    
+    color: var(--text-muted); 
+    padding: 4px 10px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    border-radius: 4px;
+    font-family: var(--font-head);
+    cursor: pointer;
+    z-index: 100;
+    
+    box-shadow: 0 0 10px var(--neon-purple);
+    animation: none !important;
+    transition: all 0.2s ease-out;
+    
+    position: relative; 
+    overflow: hidden; 
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#workVideoButton::after {
+    content: ''; 
+    position: absolute;
+    top: -3px; bottom: -3px; left: -3px; right: -3px; 
+    border: 1px dashed var(--neon-blue);
+    border-radius: 8px; 
+    opacity: 0.5;
+    animation: spin 6s linear infinite;
+    z-index: 0;
+    pointer-events: none;
+}
+#workVideoButton span, #workVideoButton i {
+    z-index: 1; 
+}
+
+#workVideoButton:active {
+    transform: scale(0.98);
+    background: rgba(255, 255, 255, 0.1); 
+    border-color: var(--neon-blue);
+    color: var(--neon-blue);
+    box-shadow: 0 0 10px var(--neon-blue);
+}
+
+/* --- Pagination (Previous/Next) Button Design (New) --- */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 15px;
+}
+.page-btn {
+    background: rgba(0, 240, 255, 0.1);
+    border: 1px solid var(--neon-blue);
+    color: var(--neon-blue);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-family: var(--font-head);
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+}
+.page-btn.active {
+    background: var(--neon-blue);
+    color: var(--bg-dark);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+}
+.page-btn:disabled {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: #555;
+    color: #555;
+    cursor: not-allowed;
+    text-shadow: none;
+    box-shadow: none;
+}
+    </style>
+    
+</head>
+<body>
+
+    <div id="loader-screen">
+        <div class="loader-bg-aurora"></div>
+        
+        <div class="loader-orbit-box">
+            <div class="loader-ring-outer"></div>
+            <div class="loader-ring-inner"></div>
+            
+            <div class="loader-core-logo">
+                <img class="img1" src="img1.png" alt="Logo" /> 
+            </div>
+        </div>
+
+        <div class="loader-text-wrapper">
+            <span id="progressText">0%</span>
+            <span class="loading-label">SYSTEM SYNC</span>
+        </div>
+    </div>
+
+
+    <div class="bg-particles"></div>
+    <div class="bg-glow"></div>
+
+    <div class="cyber-header">
+        <div class="cyber-badge user-badge">
+            <i class="fas fa-fingerprint"></i> <span id="uidDisplay">...</span>
+        </div>
+        <div class="cyber-badge user-name">
+            <i class="fas fa-user-astronaut"></i> <span id="username">Guest</span>
+        </div>
+    </div>
+
+    <div class="balance-orbit-container">
+        <div class="orbit-ring"></div>
+        <div class="orbit-ring-2"></div>
+        <div class="balance-core">
+            <div class="coin-hologram"><i class="fas fa-coins" id="mainCoinIcon"></i></div>
+            
+            <span id="balance">0</span>
+            
+            <div id="usdBalance" class="usd-label">= $0.00000</div>
+            
+            <div class="balance-label">Candy Fruit</div>
+        </div>
+    </div>
+
+    <div class="cyber-container">
+        
+        <div id="home-section" class="page-section active-section">
+            <div class="neon-title">Ad Networks <div class="line"></div></div>
+            
+            <div class="cyber-tabs">
+                <!-- Zone 1 (Adsgram) -->
+                <div class="cyber-tab active" id="tab-adsgram" onclick="switchAdTab('adsgram')">
+                    <i class="fas fa-cube"></i> Zone 1
+                </div>
+                <!-- Zone 2 (Monetag) -->
+                <div class="cyber-tab" id="tab-monetag" onclick="switchAdTab('monetag')">
+                    <i class="fas fa-cube"></i> Zone 2
+                </div>
+                <!-- Zone 3 (Onclicka) - Removed -->
+            </div>
+
+            <!-- Zone 1 Card: Adsgram -->
+            <div id="card-adsgram" class="ad-card-container active">
+                <div class="glass-panel" id="adsgramCard">
+                    <button id="workVideoButton" onclick="openWorkVideoLink()">
+                        <i class="fas fa-video"></i> <span>কাজের ভিডিও</span>
+                    </button>
+                    <button class="holo-btn-mini" onclick="showAdsHistoryModal()"><i class="fas fa-history"></i> Log</button> 
+                    <div class="panel-icon"><i class="fas fa-satellite-dish fa-3x"></i></div>
+                    <h3 id="adsgramCardTitle">Adsgram Link</h3> 
+                    <p id="adsgramCardDesc">Reward per ad <span class="neon-text" id="adsgramRewardDisplay">50</span> Coins</p>
+
+                    <div class="cyber-progress-box">
+                        <div class="progress-info">
+                            <span>Zone 1 Daily Progress</span>
+                            <span><b id="adsgramCount">0</b> / <span id="adsgramLimitDisplay">20</span></span>
+                        </div>
+                        <div class="neon-track">
+                            <div class="neon-bar" id="adsgramProgressBar"></div>
+                        </div>
+                    </div>
+
+                    <button class="cyber-btn-glitch" id="watchAdsgramBtn" onclick="startAdsgramFlow()">
+                        ESTABLISH LINK <span class="flare"></span>
+                    </button>
+                    <div id="adsgramCompletedMsg" class="success-msg"><i class="fas fa-check-circle"></i> Come back the next day.</div>
+                </div>
+            </div>
+            
+            <!-- Zone 2 Card: Monetag -->
+            <div id="card-monetag" class="ad-card-container">
+                <div class="glass-panel" id="adCard">
+                    <button id="workVideoButton" onclick="openWorkVideoLink()">
+                        <i class="fas fa-video"></i> <span>কাজের ভিডিও</span>
+                    </button>
+                    <button class="holo-btn-mini" onclick="showAdsHistoryModal()"><i class="fas fa-history"></i> Log</button> 
+                    <div class="panel-icon"><i class="fas fa-play-circle fa-3x"></i></div>
+                    <h3 id="adCardTitle">Video Stream</h3> 
+                    <p id="adCardDesc">Reward per ad <span class="neon-text" id="rewardAmountDisplay">50</span> Coins</p>
+
+                    <div class="cyber-progress-box">
+                        <div class="progress-info">
+                            <span>Zone 2 Daily Progress</span>
+                            <span><b id="adCount">0</b> / <span id="limitDisplay">20</span></span>
+                        </div>
+                        <div class="neon-track">
+                            <div class="neon-bar" id="dailyProgressBar"></div>
+                        </div>
+                    </div>
+
+                    <button class="cyber-btn-glitch" id="watchAdBtn" onclick="startAdFlow()">
+                        INITIALIZE AD <span class="flare"></span>
+                    </button>
+                    <div id="completedMsg" class="success-msg"><i class="fas fa-check-circle"></i> Come back the next day.</div>
+                </div>
+            </div>
+            
+            <!-- Zone 3 Card: Onclicka - Removed -->
+        </div>
+
+        <div id="tasks-section" class="page-section">
+            <div class="mission-capsule daily-mission">
+                <div class="capsule-left">
+                    <div class="capsule-icon"><i class="fas fa-calendar-alt"></i></div>
+                    <div class="capsule-info">
+                        <h4>Daily Protocol</h4>
+                        <p id="dailyRewardAmountDisplay">+100 Credits</p>
+                    </div>
+                </div>
+                <button id="dailyClaimBtn" class="cyber-btn-small" onclick="claimDailyReward()">CHECK-IN</button>
+            </div>
+
+            <div class="neon-title" id="missionsSectionTitle">Active Missions <div class="line"></div></div>
+            <div id="taskListContainer">
+                <div class="loading-holo">
+                    <div class="scanner"></div>
+                    <p>Scanning for missions...</p>
+                </div>
+            </div>
+
+            <div class="neon-title" id="completedMissionsTitle" style="display:none; margin-top: 30px;">Completed Logs <div class="line"></div></div>
+            <div id="completedListContainer"></div>
+        </div>
+
+        <!-- #topref-section (Rank/Leaderboard/Tournament) - Removed -->
+
+        <div id="invite-section" class="page-section">
+            <div class="neon-title" id="inviteSectionTitle">Recruitment <div class="line"></div></div>
+            
+            <div class="glass-panel">
+                
+                <div class="vault-icon"><i class="fas fa-user-plus fa-3x"></i></div>
+                
+                <h3>Refer & Earn</h3>
+                <p>Share link & get bonus!</p>
+                
+                <div class="split-stats">
+                    <div class="stat-block">
+                        <i class="fas fa-users"></i>
+                        <h3 id="ref-count">0</h3>
+                        <p>Referrals</p>
+                    </div>
+                    <div class="stat-block">
+                        <i class="fas fa-gem"></i>
+                        <h3 id="ref-earned">0</h3>
+                        <p>Earned</p>
+                    </div>
+                </div>
+
+                <div class="link-vault">
+                    <div class="vault-label">ENCRYPTED LINK</div>
+                    <div class="vault-text" id="refLink">Loading...</div>
+                </div>
+                <button class="cyber-btn-glitch full-width" onclick="copyLink(this)">COPY Link <i class="fas fa-copy"></i></button>
+            </div>
+
+            <div class="neon-title" id="activeReferralsTitle" style="margin-top: 30px; display: none;">Active Agents <div class="line"></div></div>
+            <div id="activeReferralListContainer"></div>
+            <div id="activeReferralPagination" class="pagination" style="display: none;"></div>
+            
+            <!-- Completed Referral List and Pagination Removed -->
+        </div>
+        
+<div id="wallet-section" class="page-section">
+    <div class="neon-title" id="walletSectionTitle">Vault Access <div class="line"></div></div>
+    <div class="glass-panel vault-panel">
+        
+        <button class="holo-btn-mini" 
+                onclick="showWithdrawalRulesModal()"
+                style="left: 10px; right: auto; width: 74px; top: 10px; border-color: var(--text-muted); color: var(--text-muted);">
+            <i class="fas fa-scroll"></i> Rules
+        </button>
+
+        <button class="holo-btn-mini" onclick="showHistoryModal('withdrawal')"><i class="fas fa-history"></i> Log</button>
+        
+        <div class="vault-icon"><i class="fas fa-wallet fa-3x"></i></div>
+        <h3 id="withdrawTitle">Withdraw Assets</h3>
+        <p class="vault-desc"><span id="withdrawDesc">Min: 100</span></p> 
+        
+                <div class="cyber-input-group">
+                    <label>Amount</label>
+                    <input type="number" id="withdrawAmount" class="cyber-input" placeholder="Enter Amount">
+                </div>
+
+                <div class="cyber-input-group" id="networkSelectionGroup">
+                    <label>Method</label>
+                    
+                    <div id="customWithdrawMethodTrigger" class="cyber-input custom-select-trigger" onclick="openNetworkSelectionModal()">
+                        <span id="selectedNetworkText">Select Withdraw Method</span>
+                        <i class="fas fa-caret-down" id="triggerIcon"></i>
+                    </div>
+                    
+                    <input type="hidden" id="withdrawMethodValue" value="" />
+                </div>
+
+                <div class="cyber-input-group">
+                    <input type="number" id="accountNumber" class="cyber-input" placeholder="Wallet Address / Number" style="display: none;">
+                </div>
+                
+                <button class="cyber-btn-glitch full-width" id="requestWithdrawBtn" onclick="requestWithdraw()">
+                    INITIATE TRANSFER
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="cyber-nav">
+        <div class="nav-item active" onclick="switchTab('home', this)">
+            <div class="nav-icon"><i class="fas fa-home"></i></div>
+            <span>Home</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('tasks', this)">
+            <div class="nav-icon"><i class="fas fa-tasks"></i></div>
+            <span>Mission</span>
+        </div>
+        <!-- Rank Nav Item Removed -->
+        <div class="nav-item" onclick="switchTab('invite', this)">
+            <div class="nav-icon"><i class="fas fa-user-plus"></i></div>
+            <span>Team</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('wallet', this)">
+            <div class="nav-icon"><i class="fas fa-wallet"></i></div>
+            <span>Wallet</span>
+        </div>
+    </div>
+
+    <div id="adOverlay" class="ad-overlay">
+        <div class="loader-ring"></div>
+        <h3 class="blink-text">LOADING...</h3>
+    </div>
+    
+    <div id="homeRulesModal" class="modal-backdrop" style="display: none;">
+        <div class="cyber-modal large-modal" style="height: auto; max-height: 85vh; border-color: var(--neon-purple);">
+            <h2 class="reward-title" style="color: var(--neon-purple); font-size: 1.4rem;">Welcome</h2>
+            
+            <div class="history-scroll-area" style="text-align: left; color: #ccc; font-family: 'Rajdhani'; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; border: 1px solid rgba(188, 19, 254, 0.2); margin-top: 10px; overflow-y: auto;">
+                <div id="homeRulesContent">Loading protocols...</div>
+            </div>
+
+            <button class="cyber-btn-glitch" onclick="closeHomeRules()" style="margin-top: 20px; width: 100%;">
+                আমি বুঝেছি! <span class="flare"></span>
+            </button>
+        </div>
+    </div>
+    
+    <div id="rewardModal" class="modal-backdrop">
+        <div class="cyber-modal">
+            <div class="reward-burst"></div>
+            <div id="modalIconContainer" class="modal-icon-glow"></div>
+            <h2 class="reward-title neon-text-blue">SUCCESS</h2> 
+            <div class="reward-amount-text glitch-text" id="popupAmount">+50</div>
+            <p class="reward-desc">Transaction Verified</p> 
+            <button class="cyber-btn-small" id="modalClaimBtn">ACKNOWLEDGE</button>
+        </div>
+    </div>
+    
+    <div id="statusModal" class="modal-backdrop">
+        <div class="cyber-modal">
+            <div id="statusIconContainer"></div>
+            <h2 id="statusTitle"></h2>
+            <p id="statusDesc"></p>
+            <button id="statusBtn" class="cyber-btn-small"></button>
+        </div>
+    </div>
+    
+    <div id="historyModal" class="modal-backdrop" onclick="if(event.target.id === 'historyModal') hideHistoryModal()">
+        <div class="cyber-modal large-modal">
+            <i class="fas fa-times close-modal" onclick="hideHistoryModal()"></i>
+            <h2 class="reward-title">DATA LOGS</h2>
+            <div class="history-scroll-area">
+                <div id="historyListContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="networkSelectionModal" class="modal-backdrop" onclick="if(event.target.id === 'networkSelectionModal' || event.target.className === 'close-modal-icon') closeNetworkSelectionModal()">
+        <div class="cyber-modal large-modal network-modal-style"> 
+            <i class="fas fa-times close-modal-icon" onclick="closeNetworkSelectionModal()"></i>
+            <h2 class="reward-title">SELECT Method</h2>
+            
+            <div id="networkOptionsContainer" class="network-options-container modal-scroll-area">
+            </div>
+        </div>
+    </div>
+
+<div id="rejectedWithdrawalModal" class="modal-backdrop">
+    <div class="cyber-modal">
+        <div id="rejectedIconContainer" class="modal-main-icon text-red">
+            <i class="fas fa-hand-holding-usd"></i>
+        </div>
+        <h2 id="rejectedTitle" class="reward-title text-red">WITHDRAWAL REJECTED!</h2>
+        <p class="reward-desc" id="rejectedDesc">The amount has been refunded to your balance.</p>
+        
+        <div style="margin: 15px 0; padding: 10px; background: rgba(255, 77, 77, 0.1); border-radius: 5px; color: #ff4d4d; font-family: var(--font-head);">
+            Refunded: <span id="rejectedRefundAmount" style="font-size: 1.2rem; font-weight: bold;">0</span> Coins
+        </div>
+        
+        <button class="cyber-btn-small" id="rejectedCloseBtn" onclick="closeRejectedWithdrawalModal()">Acknowledge</button>
+    </div>
+</div>
+
+
+<div id="withdrawalRulesModal" class="modal-backdrop" onclick="if(event.target.id === 'withdrawalRulesModal') hideWithdrawalRulesModal()">
+    <div class="cyber-modal large-modal">
+        <i class="fas fa-times close-modal" onclick="hideWithdrawalRulesModal()"></i>
+        <h2 class="reward-title">Withdrawal Rules</h2>
+        <div class="history-scroll-area" style="text-align: left; color: #ccc; font-family: 'Rajdhani';">
+            <div id="withdrawalRulesContent">Loading rules...</div>
+        </div>
+    </div>
+</div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        
+const firebaseConfig = {
+    apiKey: "AIzaSyAXBG5RZ2b38kknNKzmygXrzOoCTugLIE",
+    authDomain: "new-tg-test.firebaseapp.com",
+    projectId: "new-tg-test",
+    storageBucket: "new-tg-test.firebasestorage.app",
+    messagingSenderId: "1077123386154",
+    appId: "1:1077123386154:web:dbbc89d5874127f60c6c53"
+};
+
+const BOT_USERNAME = "CandyFruitBot/app"; 
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const tg = window.Telegram.WebApp;
+tg.expand();
+
+let uid, username, firstName, lastName, referrerId = null; 
+
+if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+    const user = tg.initDataUnsafe.user;
+    uid = user.id.toString();
+    firstName = user.first_name;
+    lastName = user.last_name || ''; 
+    username = user.username || firstName;
+    if (tg.initDataUnsafe.start_param) referrerId = tg.initDataUnsafe.start_param;
+} else {
+    uid = localStorage.getItem('test_uid');
+    if(!uid) { uid = 'U'+Math.floor(Math.random()*99999); localStorage.setItem('test_uid', uid); }
+    firstName = "Guest";
+    lastName = ""; 
+    username = "GuestUser";
+}
+
+const userFullName = (firstName + ' ' + lastName).trim();
+
+document.getElementById('uidDisplay').innerText = uid;
+document.getElementById('username').innerText = userFullName || firstName; 
+
+const BOT_BASE_LINK = `https://t.me/${BOT_USERNAME}`; 
+document.getElementById('refLink').innerText = `${BOT_BASE_LINK}?startapp=${uid}`;
+
+
+let adCooldownEndTime = 0; 
+let adsgramCooldownEndTime = 0; 
+    
+let monetagCooldownInterval = null; 
+let adsgramCooldownInterval = null;
+
+let activeTaskTimeout = null;
+let activeMissionId = null;
+
+const ADSGRAM_MIN_VIEW_DURATION_MS = 14000;
+
+let currentBalance = 0;
+let adsWatchedToday = 0; // Monetag/Zone 2
+let adsgramWatchedToday = 0; // Adsgram/Zone 1
+let totalAdsWatched = 0; 
+
+let claimedDailyTasks = {}; 
+
+let referralCount = 0; 
+let completedTasks = [];
+let isBotVerified = true;
+
+let activeReferralsData = [];
+let activeRefPage = 1;
+const pageSize = 20;
+
+window.referredIdToClaim = null; 
+window.rewardAmountToClaim = null; 
+
+let coinClickCycle = 0;
+
+let selectedWithdrawalMethod = null;
+let selectedMethodValue = '';
+
+const USD_PER_COIN = 50 / 5000; 
+
+// ----------------------------------------------------------------------
+// --- HARDCODED SETTINGS (DEFAULT FOR UI, OVERWRITTEN BY FIREBASE) ---
+// ----------------------------------------------------------------------
+let settings = {
+    work_video_enabled: true,
+    work_video_title: 'কাজের ভিডিও',
+    work_video_link: 'https://youtube.com',
+    home_rules_enabled: true,
+    home_rules_content: '<div style="text-align:left;"><hr>🌸 <strong>আসসালামু আলাইকুম।</strong> আমরা সম্পূর্ণ সততার সাথে পেমেন্ট প্রদান করি। নিয়ম মেনে কাজ করলে <strong>১০০% পেমেন্ট পাবেন ইনশাআল্লাহ।</strong> ✅<br><hr><br><strong>🤴 প্রতি সফল রেফারে:</strong> 200 Coins = $2 Dollar = ২২০ টাকা।<br><br><strong>💰 প্রতি বিজ্ঞাপন (Ads):</strong> 10 Coins = $0.10 Dollar = ১১ টাকা করে আয়।<br><br><strong>📺 প্রতিদিন বিজ্ঞাপন দেখার সুযোগ:</strong> সর্বোচ্চ ৩০টি Ads।<br><br><strong>🔥 ইনকাম করতে কোনো ইনভেস্ট প্রয়োজন নেই —</strong> সম্পূর্ণ ফ্রিতে কাজ করা যাবে।<br><br><strong>⚡ পেমেন্ট মেথড:</strong> বিকাশ, নগদ এবং Binance।<br><br>✅<strong> একাউন্ট সক্রিয় (Active)</strong> রাখতে প্রতিদিন ন্যুনতম ১০ টি Ads দেখতে হবে!<br><hr><br><i>📝 NOTE: যেকোনো আপডেট বা সমস্যার সমাধানের জন্য অফিসিয়াল চ্যানেলে যুক্ত থাকুন।</i></div>',
+    
+    adsgram_enabled: true, 
+    monetag_enabled: true, 
+    
+    daily_limit: 20, 
+    reward_per_ad: 50, 
+    monetag_ad_code: '', 
+    monetag_cooldown_duration: 20000, // Hardcoded 20 seconds
+    ad_card_title: 'Video Stream', 
+    ad_card_desc: 'Reward: <span class="neon-text" id="rewardAmountDisplay">50</span> Coins', 
+    ad_btn_text: 'INITIALIZE AD',
+
+    adsgram_daily_limit: 20, 
+    adsgram_reward: 50, 
+    adsgram_block_id: 'int-18699',
+    adsgram_cooldown_duration: 20000, // Hardcoded 20 seconds
+    adsgram_card_title: 'Adsgram Link', 
+    adsgram_card_desc: 'Reward: <span class="neon-text" id="adsgramRewardDisplay">50</span> Coins', 
+    adsgram_btn_text: 'ESTABLISH LINK',
+
+    min_daily_ads_for_active: 10,
+    min_withdraw: 100, 
+    ref_bonus: 200, 
+    daily_reward_amount: 100,
+    min_ads_view_for_withdraw: 0, 
+    min_referrals_for_withdraw: 0, 
+    
+    ref_title: 'Refer & Earn', 
+    ref_desc: 'Share link & get bonus!',
+    ref_ads_watch_requirement: 100, 
+    
+    ad_popup_title: 'DATA RECEIVED', 
+    ad_popup_desc: 'Reward Coins Added.', 
+    daily_popup_title: 'LOGGED', 
+    daily_popup_desc: 'Daily check-in complete.', 
+    mission_popup_title: 'MISSION COMPLETE', 
+    mission_popup_desc: 'Bounty Claimed.',
+    
+    withdraw_title: 'Withdraw Assets', 
+    withdraw_desc: 'Min: {{min_withdraw}}', 
+    pay_methods: [{name: 'bKash', placeholder: 'bKash Number'}, {name: 'Nagad', placeholder: 'Nagad Number'}],
+    request_withdraw_btn_text: 'INITIATE TRANSFER', 
+    modal_claim_btn_text: 'ACKNOWLEDGE', 
+    error_modal_btn_text: 'CLOSE', 
+    withdraw_success_title: 'SUCCESS', 
+    withdraw_success_desc: 'Transfer Initiated.', 
+    withdraw_success_btn_text: 'DONE',          
+    min_amt_err_title: 'Error', 
+    min_amt_err_desc: 'Min required: {{min_withdraw}}', 
+    bal_err_title: 'Error', 
+    bal_err_desc: 'Insufficient Funds.',
+    method_err_title: 'Error', 
+    method_err_desc: 'Select Network.', 
+    acc_num_err_title: 'Error', 
+    acc_num_err_desc: 'Enter Address.',
+    min_ads_err_title: 'Access Denied', 
+    min_ads_err_desc: 'Watch more ads.', 
+    min_refs_err_title: 'Access Denied', 
+    min_refs_err_desc: 'Recruit more agents.', 
+    
+    withdrawal_rules_content: '<p>The minimum withdrawal is {{min_withdraw}} coins. Ensure your account number is correct. All withdrawals are processed within 24-72 hours.</p>',
+
+    withdraw_amount_placeholder: 'Enter Amount', 
+    hide_rank_section: true, // Rank section is removed from UI
+    tasks_last_updated: 0, // NEW: Timestamp for admin updates on tasks
+}; 
+let adFunctionName = null, lastDailyClaimDate = null; 
+// ----------------------------------------------------------------------
+
+const userRef = db.collection('users').doc(uid);
+
+// ----------------------------------------------------------------------
+// --- ক্যাশিং ফাংশন এবং ইউটিলিটি (Persistent Caching with Invalidation) ---
+// ----------------------------------------------------------------------
+const CACHE_PREFIX = 'cf_cache_';
+
+/**
+ * ডেটা লোকালস্টোরেজে সংরক্ষণ করে এবং টাইমস্ট্যাম্প সেট করে।
+ * @param {string} key ক্যাশের কী (key)
+ * @param {object} data সংরক্ষণ করার জন্য ডেটা
+ */
+function setCache(key, data) {
+    const cacheData = { 
+        data: data, 
+        timestamp: Date.now() // Record the time when data was saved
+    };
+    try {
+        localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(cacheData));
+    } catch (e) {
+        console.error("Error setting persistent cache:", e);
+    }
+}
+
+/**
+ * ক্যাশ থেকে ডেটা পুনরুদ্ধার করে, Firebase-এর লাস্ট-আপডেটেড টাইমস্ট্যাম্পের সাথে তুলনা করে।
+ * @param {string} key ক্যাশের কী (key)
+ * @param {number} firebaseLastUpdatedTime Firebase থেকে পাওয়া সর্বশেষ আপডেটের টাইমস্ট্যাম্প
+ * @returns {object | null} ডেটা যদি বৈধ হয়, অন্যথায় null
+ */
+function getCache(key, firebaseLastUpdatedTime = 0) {
+    const item = localStorage.getItem(CACHE_PREFIX + key);
+    if (!item) {
+        return null;
+    }
+    try {
+        const cacheData = JSON.parse(item);
+        
+        // যদি Firebase Last Updated Time ক্যাশের ডেটা সেভ করার সময়ের চেয়ে বেশি হয়, তবে ক্যাশ ইনভ্যালিড (পুরাতন)
+        if (cacheData.timestamp >= firebaseLastUpdatedTime) {
+            return cacheData.data;
+        } else {
+            console.log(`Cache ${key} invalidated by Firebase timestamp: ${firebaseLastUpdatedTime}`);
+            localStorage.removeItem(CACHE_PREFIX + key); // Invalidate old data
+            return null;
+        }
+    } catch (e) {
+        console.error("Error parsing cache:", e);
+        localStorage.removeItem(CACHE_PREFIX + key);
+        return null;
+    }
+}
+
+// স্থায়ী ক্যাশিং হওয়ায়, অটোমেটিক ক্লিয়ার করার setInterval ফাংশনটি সরিয়ে দেওয়া হলো।
+
+// ----------------------------------------------------------------------
+
+function updateUsdDisplay(coins) {
+// ... (rest of the function remains the same)
+    const usdEl = document.getElementById('usdBalance');
+    if (usdEl) {
+        const usdValue = (coins * USD_PER_COIN).toFixed(5); 
+        usdEl.innerText = `= $${usdValue}`;
+    }
+}
+
+function updateWorkVideoButtonUI() {
+// ... (rest of the function remains the same)
+    const btns = document.querySelectorAll('#workVideoButton');
+    if (!btns.length) return;
+
+    btns.forEach(btn => {
+        if (settings.work_video_enabled) {
+            btn.style.display = 'flex';
+            const span = btn.querySelector('span');
+            if(span) span.innerText = settings.work_video_title;
+        } else {
+            btn.style.display = 'none';
+        }
+    });
+}
+
+function openWorkVideoLink() {
+// ... (rest of the function remains the same)
+    if (settings.work_video_enabled && settings.work_video_link) {
+        window.open(settings.work_video_link, '_blank');
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    startNetworkBasedLoading();
+    
+    document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active-section'));
+    document.getElementById('home-section').classList.add('active-section');
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    const homeNavItem = document.querySelector(`.cyber-nav .nav-item[onclick*="'home'"]`);
+    if (homeNavItem) homeNavItem.classList.add('active');
+});
+
+// --- ফিক্সড: লোডারকে ডেটা লোড না হওয়া পর্যন্ত আটকে রাখা হয়েছে ---
+let isFirebaseDataReady = false; 
+let isVisualLoadingComplete = false;
+let visualLoaderInterval = null;
+
+function checkAndHideLoader() {
+// ... (rest of the function remains the same)
+    if (isFirebaseDataReady && isVisualLoadingComplete) {
+        if(visualLoaderInterval) clearInterval(visualLoaderInterval);
+
+        const loaderScreen = document.getElementById('loader-screen');
+        const flash = document.createElement('div');
+        flash.className = 'flash-burst flash-active';
+        document.body.appendChild(flash);
+        
+        if(loaderScreen) loaderScreen.classList.add('loaded');
+        
+        setTimeout(() => {
+            if(loaderScreen) loaderScreen.style.display = 'none';
+            flash.remove();
+        }, 800);
+    }
+}
+
+function startNetworkBasedLoading() {
+// ... (rest of the function remains the same)
+    const loaderScreen = document.getElementById('loader-screen');
+    const progressText = document.getElementById('progressText');
+    
+    let currentProgress = 1; 
+    if(progressText) progressText.innerText = '1%'; 
+    
+    const MIN_DURATION = 4000;
+    const INTERVAL = 30;
+    let targetDuration = MIN_DURATION; 
+    
+    // Simplifed Loading Visual Logic
+    let totalSteps = targetDuration / INTERVAL;
+    let increment = 100 / totalSteps;
+    increment = increment + (Math.random() * 0.1); 
+
+    visualLoaderInterval = setInterval(() => {
+        let randomFactor = Math.random() * 0.1;
+        currentProgress += increment + randomFactor;
+
+        if (currentProgress >= 100) {
+            currentProgress = 100;
+            isVisualLoadingComplete = true;
+            checkAndHideLoader();
+        }
+
+        if(progressText) {
+            progressText.innerText = Math.floor(currentProgress) + '%';
+        }
+
+    }, INTERVAL);
+    
+    // Wait for the data to be processed from the onSnapshot listener
+    // The onSnapshot listener handles setting isFirebaseDataReady = true
+}
+// ----------------------------------------------------------------------
+
+function logUserEntryActivity() {
+// ... (rest of the function remains the same)
+    if (uid) { 
+        const todayDate = new Date().toDateString();
+
+        userRef.get().then(doc => {
+            const d = doc.data();
+            const lastActiveDate = d.last_24h_active_count_date;
+            
+            let updateData = {};
+
+            if (lastActiveDate !== todayDate) {
+                 updateData.last_24h_active_count_date = todayDate;
+                 userRef.update(updateData).catch(err => {});
+            }
+        }).catch(err => {
+            userRef.update({ last_24h_active_count_date: new Date().toDateString() }).catch(err => {});
+        });
+    }
+}
+logUserEntryActivity(); 
+
+function loadMonetagSdk(adCode) {
+// ... (rest of the function remains the same)
+    const head = document.getElementsByTagName('head')[0];
+    let script = document.createElement('script');
+    script.src = '//libtl.com/sdk.js'; script.setAttribute('data-zone', adCode.replace('show_', '')); script.setAttribute('data-sdk', adCode);
+    head.appendChild(script);
+}
+
+function populateWithdrawMethods(methodsArray) {
+// ... (rest of the function remains the same)
+    const containerEl = document.getElementById('networkOptionsContainer');
+    const selectedTextEl = document.getElementById('selectedNetworkText');
+    
+    containerEl.innerHTML = ''; 
+    
+    if (!Array.isArray(methodsArray) || methodsArray.length === 0) {
+        containerEl.innerHTML = `<p style="color:var(--text-muted); text-align:center;">No withdrawal nodes available.</p>`;
+        return;
+    }
+
+    methodsArray.forEach((method, index) => {
+        const optionValue = method.name.replace(/\s/g, ''); 
+        
+        const capsule = document.createElement('div');
+        capsule.className = 'network-option-capsule';
+        capsule.setAttribute('data-value', optionValue);
+        capsule.setAttribute('data-placeholder', method.placeholder || 'Wallet Address / Number');
+        const name = method.name.replace(/'/g, "\\'");
+        const placeholder = (method.placeholder || 'Wallet Address / Number').replace(/'/g, "\\'");
+        capsule.setAttribute('onclick', `selectNetwork(this, '${name}', '${optionValue}', '${placeholder}')`);
+
+        capsule.innerHTML = `
+            <div class="capsule-content">
+                <i class="fas fa-satellite-dish capsule-icon-holo"></i>
+                <span>${method.name}</span>
+            </div>
+        `;
+        
+        capsule.style.animation = `capsuleIn 0.3s ease-out ${index * 0.12}s forwards`;
+        
+        containerEl.appendChild(capsule);
+    });
+    
+    if (selectedMethodValue) {
+        const preSelected = containerEl.querySelector(`[data-value="${selectedMethodValue}"]`);
+        if(preSelected) {
+            preSelected.classList.add('selected');
+            selectedTextEl.innerText = selectedWithdrawalMethod.name;
+        }
+    } else {
+        selectedTextEl.innerText = 'Select Withdraw Method';
+    }
+
+    if (selectedMethodValue && selectedWithdrawalMethod) {
+        toggleAccountInput(selectedWithdrawalMethod.placeholder);
+    } else {
+         toggleAccountInput('');
+    }
+}
+
+function initApp() {
+    updateUI(); 
+    updateDailyRewardUI(); 
+    
+    updateWorkVideoButtonUI();
+    updateAdTabVisibility(); 
+
+    showEntryRules();
+}
+
+function closeHomeRules() {
+// ... (rest of the function remains the same)
+    document.getElementById('homeRulesModal').style.display = 'none';
+}
+
+function showEntryRules() {
+// ... (rest of the function remains the same)
+    if (settings.home_rules_enabled === true && !sessionStorage.getItem('rulesAlreadyShown')) {
+        document.getElementById('homeRulesContent').innerHTML = settings.home_rules_content;
+        document.getElementById('homeRulesModal').style.display = 'flex';
+        sessionStorage.setItem('rulesAlreadyShown', 'true');
+    }
+}
+
+function switchAdTab(tab) {
+// ... (rest of the function remains the same)
+    if (!settings[tab + '_enabled']) return; 
+
+    document.querySelectorAll('.cyber-tab').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.ad-card-container').forEach(el => el.classList.remove('active'));
+    
+    document.getElementById('tab-' + tab).classList.add('active');
+    document.getElementById('card-' + tab).classList.add('active');
+    
+    updateUI(); 
+}
+
+function updateAdTabVisibility() {
+// ... (rest of the function remains the same)
+    const tabs = ['adsgram', 'monetag']; 
+    const tabContainer = document.querySelector('.cyber-tabs');
+    const enabledTabs = [];
+
+    tabs.forEach(tab => {
+        const isEnabled = settings[tab + '_enabled'];
+        const tabEl = document.getElementById('tab-' + tab);
+        const cardEl = document.getElementById('card-' + tab);
+        
+        if (tabEl) tabEl.style.display = isEnabled ? 'flex' : 'none';
+        if (isEnabled) enabledTabs.push(tab);
+        else if (cardEl) cardEl.classList.remove('active');
+    });
+
+    if (enabledTabs.length === 0) {
+        tabContainer.style.display = 'none';
+    } else {
+        tabContainer.style.display = 'flex';
+        let activeFound = false;
+        
+        tabs.forEach(tab => {
+            const tabEl = document.getElementById('tab-' + tab);
+            const cardEl = document.getElementById('card-' + tab);
+            if (tabEl && tabEl.classList.contains('active') && settings[tab + '_enabled']) {
+                activeFound = true;
+            } else {
+                tabEl && tabEl.classList.remove('active');
+                cardEl && cardEl.classList.remove('active');
+            }
+        });
+
+        if (!activeFound && enabledTabs.length > 0) {
+            switchAdTab(enabledTabs[0]);
+        }
+    }
+}
+
+const setRef = db.collection('settings').doc('global');
+setRef.onSnapshot(doc => {
+    if (doc.exists) {
+        const d = doc.data();
+        
+        settings.monetag_enabled = d.monetag_enabled !== undefined ? d.monetag_enabled : true; 
+        settings.adsgram_enabled = d.adsgram_enabled !== undefined ? d.adsgram_enabled : true; 
+        
+        settings.min_daily_ads_for_active = d.min_daily_ads_for_active || 10;
+        
+        // Zone 2 (Monetag) Settings
+        settings.daily_limit = d.daily_limit || 20; 
+        settings.reward_per_ad = d.reward_per_ad || 50;
+        settings.monetag_cooldown_duration = d.monetag_cooldown_duration || 20000; 
+        settings.monetag_ad_code = d.monetag_ad_code || '';
+        
+        // Zone 1 (Adsgram) Settings
+        settings.adsgram_cooldown_duration = d.adsgram_cooldown_duration || 20000; 
+        settings.adsgram_daily_limit = d.adsgram_daily_limit || 20; 
+        settings.adsgram_reward = d.adsgram_reward || 50; 
+        settings.adsgram_block_id = d.adsgram_block_id || 'int-18699';
+        
+        // General Settings
+        Object.assign(settings, d); 
+        
+        settings.work_video_enabled = d.work_video_enabled !== undefined ? d.work_video_enabled : true;
+        settings.work_video_title = d.work_video_title || 'কাজের ভিডিও';
+        settings.work_video_link = d.work_video_link || 'https://youtube.com';
+        
+        settings.min_withdraw = d.min_withdraw || 100;
+        
+        // NEW: Load the task last updated timestamp for admin invalidation
+        settings.tasks_last_updated = (d.tasks_last_updated ? d.tasks_last_updated.toMillis() : 0) || 0;
+        
+        // Apply UI updates
+        document.getElementById('limitDisplay').innerText = settings.daily_limit;
+        document.getElementById('rewardAmountDisplay').innerText = settings.reward_per_ad;
+        document.getElementById('adsgramLimitDisplay').innerText = settings.adsgram_daily_limit;
+        document.getElementById('adsgramRewardDisplay').innerText = settings.adsgram_reward;
+        
+        document.getElementById('adCardTitle').innerText = settings.ad_card_title || 'Video Stream';
+        document.getElementById('adsgramCardTitle').innerText = settings.adsgram_card_title || 'Adsgram Link';
+        document.getElementById('watchAdBtn').innerHTML = `${settings.ad_btn_text || 'INITIALIZE AD'} <span class="flare"></span>`;
+        document.getElementById('watchAdsgramBtn').innerHTML = `${settings.adsgram_btn_text || 'ESTABLISH LINK'} <span class="flare"></span>`;
+
+
+        document.getElementById('dailyRewardAmountDisplay').innerText = `+${settings.daily_reward_amount || 100} Coins`; 
+        document.getElementById('missionsSectionTitle').innerHTML = 'Active Missions <div class="line"></div>'; // Hardcoded English
+        document.getElementById('inviteSectionTitle').innerHTML = 'Recruitment <div class="line"></div>'; // Hardcoded English (User-facing names must be hardcoded here if not from settings)
+        document.getElementById('activeReferralsTitle').innerHTML = 'Active Agents <div class="line"></div>'; // Hardcoded English
+        document.getElementById('walletSectionTitle').innerHTML = (settings.wallet_section_title || 'Vault Access') + ' <div class="line"></div>';
+
+        document.querySelector('#invite-section .glass-panel h3').innerText = settings.ref_title || 'Refer & Earn';
+        document.querySelector('#invite-section .glass-panel p').innerText = settings.ref_desc || 'Share link & get bonus!';
+
+        document.getElementById('withdrawTitle').innerText = settings.withdraw_title || 'Withdraw Assets';
+        document.getElementById('withdrawDesc').innerHTML = (settings.withdraw_desc || 'Min: {{min_withdraw}}').replace('{{min_withdraw}}', settings.min_withdraw);
+        document.getElementById('requestWithdrawBtn').innerText = settings.request_withdraw_btn_text || 'INITIATE TRANSFER'; 
+        
+        document.getElementById('withdrawAmount').placeholder = settings.withdraw_amount_placeholder || 'Enter Amount'; 
+        populateWithdrawMethods(settings.pay_methods);
+        
+        if (settings.monetag_ad_code && !adFunctionName) {
+            adFunctionName = settings.monetag_ad_code;
+            setTimeout(() => loadMonetagSdk(adFunctionName), 500); 
+        }
+
+        updateUI(); 
+        updateAdTabVisibility(); 
+        
+        updateWorkVideoButtonUI();
+    }
+});
+
+userRef.onSnapshot(doc => {
+    if (doc.exists) {
+        const d = doc.data();
+        currentBalance = d.balance || 0;
+        completedTasks = d.completed_tasks || [];
+        claimedDailyTasks = d.claimed_daily_tasks || {}; 
+        lastDailyClaimDate = d.last_daily_claim_date || null; 
+        totalAdsWatched = d.total_ads_watched || 0; 
+        referralCount = d.referral_count || 0; 
+        isBotVerified = d.is_verified_bot_joined || true;
+        
+        adCooldownEndTime = d.ad_cooldown_end_time || 0; 
+        adsgramCooldownEndTime = d.adsgram_cooldown_end_time || 0; 
+        
+        const balEl = document.getElementById('balance');
+        balEl.innerText = currentBalance;
+        
+        updateUsdDisplay(currentBalance);
+        
+        // REFERRAL COUNT IS REAL-TIME - NO CACHING ISSUES HERE
+        document.getElementById('ref-count').innerText = d.referral_count || 0;
+        document.getElementById('ref-earned').innerText = d.referral_earnings || 0;
+
+        adjustRefStatSize('ref-count');
+        adjustRefStatSize('ref-earned');
+
+        const today = new Date().toDateString();
+        
+        let totalDailyAds = 0;
+        
+        if (d.last_ad_date !== today) {
+            adsWatchedToday = 0; adsgramWatchedToday = 0; 
+            if (d.ads_watched !== 0 || d.adsgram_ads_watched !== 0) {
+                 userRef.update({ ads_watched: 0, adsgram_ads_watched: 0, last_ad_date: today }); 
+            }
+            totalDailyAds = 0;
+        } else {
+            adsWatchedToday = d.ads_watched || 0; 
+            adsgramWatchedToday = d.adsgram_ads_watched || 0; 
+            totalDailyAds = adsWatchedToday + adsgramWatchedToday;
+        }
+        
+        const rejectedData = d.rejected_popup_data;
+        if (rejectedData && rejectedData.withdrawal_id) {
+            showRejectedWithdrawalModal(rejectedData);
+            document.querySelector('.cyber-nav').style.display = 'none';
+            return;
+        }
+        
+        if(document.getElementById('statusModal').style.display !== 'none') {
+            document.getElementById('statusModal').style.display = 'none';
+        }
+        
+        // --- ফিক্সড: লোডার বন্ধ করার লজিক এখানে কল করা হয়েছে ---
+        if (!isFirebaseDataReady) {
+            isFirebaseDataReady = true;
+            checkAndHideLoader();
+        }
+        // ----------------------------------------------------
+        
+        initApp(); 
+        
+    } else {
+        
+        db.collection('users').doc(uid).get().then(docCheck => {
+            if (docCheck.exists) {
+                return; 
+            }
+            
+            let newUser = {
+                balance: 0, ads_watched: 0, adsgram_ads_watched: 0, total_ads_watched: 0, referral_count: 0, referral_earnings: 0, 
+                completed_tasks: [], claimed_daily_tasks: {}, last_ad_date: new Date().toDateString(), 
+                username: username, full_name: userFullName, 
+                is_verified_bot_joined: true,
+                last_daily_claim_date: null, 
+                created_at: firebase.firestore.FieldValue.serverTimestamp(),
+                last_24h_active_count_date: new Date().toDateString(), 
+                ad_cooldown_end_time: 0, 
+                adsgram_cooldown_end_time: 0,
+                rejected_popup_data: null, 
+            };
+            if (referrerId && referrerId !== uid) {
+                newUser.referred_by = referrerId;
+                // REAL-TIME REFERRAL COUNT UPDATE
+                db.collection('users').doc(referrerId).update({ referral_count: firebase.firestore.FieldValue.increment(1) });
+                
+                db.collection('users').doc(referrerId).collection('referred_users').doc(uid).set({
+                    referred_uid: uid, referred_username: userFullName, referred_total_ads_watched: 0, 
+                    is_claimed: false, claimed_at: null, created_at: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+            
+            userRef.set(newUser, { merge: true }).then(() => { 
+                // ... (Loader logic)
+                if (!isFirebaseDataReady) {
+                    isFirebaseDataReady = true;
+                    checkAndHideLoader();
+                }
+                initApp(); 
+            });
+            document.getElementById('balance').innerText = 0;
+            
+        }).catch(err => {
+            console.error("New user creation double-check failed:", err);
+             if (!isFirebaseDataReady) {
+                isFirebaseDataReady = true;
+                checkAndHideLoader();
+            }
+        });
+    }
+});
+
+
+function startAdCooldownTimer(endTime) {
+// ... (rest of the function remains the same)
+    if (monetagCooldownInterval) clearInterval(monetagCooldownInterval); 
+    const btn = document.getElementById('watchAdBtn');
+    btn.classList.add('disabled'); btn.onclick = 'void(0)';
+
+    monetagCooldownInterval = setInterval(() => {
+        const now = Date.now();
+        const remaining = endTime - now; 
+        if (remaining <= 0) {
+            clearInterval(monetagCooldownInterval); monetagCooldownInterval = null;
+            btn.classList.remove('disabled'); btn.onclick = startAdFlow; btn.innerHTML = `${settings.ad_btn_text} <span class="flare"></span>`; 
+            userRef.update({ ad_cooldown_end_time: 0 }); updateUI(); return;
+        }
+        const seconds = Math.floor(remaining / 1000); 
+        btn.innerHTML = `COOLDOWN: ${seconds}s`;
+    }, 1000);
+}
+
+function startAdsgramCooldownTimer(endTime) {
+// ... (rest of the function remains the same)
+    if (adsgramCooldownInterval) clearInterval(adsgramCooldownInterval); 
+    const btn = document.getElementById('watchAdsgramBtn');
+    btn.classList.add('disabled'); btn.onclick = 'void(0)';
+
+    adsgramCooldownInterval = setInterval(() => {
+        const now = Date.now();
+        const remaining = endTime - now; 
+        if (remaining <= 0) {
+            clearInterval(adsgramCooldownInterval); adsgramCooldownInterval = null;
+            btn.classList.remove('disabled'); btn.onclick = startAdsgramFlow; btn.innerHTML = `${settings.adsgram_btn_text} <span class="flare"></span>`; 
+            userRef.update({ adsgram_cooldown_end_time: 0 }); updateUI(); return;
+        }
+        const seconds = Math.floor(remaining / 1000); 
+        btn.innerHTML = `COOLDOWN: ${seconds}s`;
+    }, 1000);
+}
+
+function updateUI() {
+// ... (rest of the function remains the same)
+    const now = Date.now();
+
+    // Adsgram (Zone 1)
+    const aBtn = document.getElementById('watchAdsgramBtn');
+    const isAdsgramOnCooldown = now < adsgramCooldownEndTime;
+    document.getElementById('adsgramCount').innerText = adsgramWatchedToday;
+    document.getElementById('adsgramLimitDisplay').innerText = settings.adsgram_daily_limit;
+    document.getElementById('adsgramProgressBar').style.width = ((adsgramWatchedToday / settings.adsgram_daily_limit) * 100) + '%';
+    if (isAdsgramOnCooldown) {
+        startAdsgramCooldownTimer(adsgramCooldownEndTime);
+    } else if (adsgramWatchedToday >= settings.adsgram_daily_limit) {
+        aBtn.classList.add('disabled'); aBtn.innerText = 'LIMIT REACHED'; document.getElementById('adsgramCompletedMsg').style.display = 'block';
+    } else {
+        aBtn.classList.remove('disabled'); document.getElementById('adsgramCompletedMsg').style.display = 'none';
+        aBtn.onclick = startAdsgramFlow; aBtn.innerHTML = `${settings.adsgram_btn_text} <span class="flare"></span>`;
+    }
+
+    // Monetag (Zone 2)
+    const mBtn = document.getElementById('watchAdBtn');
+    const isOnCooldown = now < adCooldownEndTime;
+    document.getElementById('adCount').innerText = adsWatchedToday;
+    document.getElementById('limitDisplay').innerText = settings.daily_limit;
+    document.getElementById('dailyProgressBar').style.width = ((adsWatchedToday / settings.daily_limit) * 100) + '%';
+    if (isOnCooldown) {
+        startAdCooldownTimer(adCooldownEndTime);
+    } else if (adsWatchedToday >= settings.daily_limit) {
+        mBtn.classList.add('disabled'); mBtn.innerText = 'LIMIT REACHED'; document.getElementById('completedMsg').style.display = 'block';
+    } else {
+        mBtn.classList.remove('disabled'); document.getElementById('completedMsg').style.display = 'none';
+        mBtn.onclick = startAdFlow; mBtn.innerHTML = `${settings.ad_btn_text} <span class="flare"></span>`;
+    }
+}
+
+function updateDailyRewardUI() {
+// ... (rest of the function remains the same)
+    const btn = document.getElementById('dailyClaimBtn'); const today = new Date().toDateString(); if (!btn) return; 
+    if (lastDailyClaimDate === today) { btn.classList.add('disabled'); btn.innerText = 'LOGGED'; btn.onclick = 'void(0)'; } 
+    else { btn.classList.remove('disabled'); btn.innerText = 'CHECK-IN'; btn.onclick = claimDailyReward; btn.disabled = false; }
+}
+function claimDailyReward() {
+// ... (rest of the function remains the same)
+    const today = new Date().toDateString();
+    if (lastDailyClaimDate === today) { showErrorModal('ALREADY LOGGED', 'Daily protocol completed.', 'exclamation-triangle'); updateDailyRewardUI(); return; }
+    document.getElementById('dailyClaimBtn').disabled = true; window.dailyClaimButtonRef = document.getElementById('dailyClaimBtn'); 
+    showRewardModal('daily', settings.daily_reward_amount, null); 
+}
+
+function startDailyTaskCountdown(taskId, endTimeMs) {
+// ... (rest of the function remains the same)
+    const timerEl = document.getElementById(`reset-timer-${taskId}`);
+    if (!timerEl) return;
+    
+    if (timerEl.taskInterval) {
+        clearInterval(timerEl.taskInterval);
+    }
+    
+    timerEl.style.display = 'block';
+
+    const updateTimer = () => {
+        const now = Date.now();
+        const remaining = endTimeMs - now;
+        
+        if (remaining <= 0) {
+            clearInterval(timerEl.taskInterval);
+            timerEl.innerHTML = `Ready to Reset!`; 
+            setTimeout(() => renderTasks(true), 1500); // Force load to refresh list after reset
+            return;
+        }
+
+        const totalSeconds = Math.floor(remaining / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        timerEl.innerHTML = `Reset in: ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    };
+
+    updateTimer(); 
+    timerEl.taskInterval = setInterval(updateTimer, 1000);
+}
+
+/**
+ * মিশন ডেটা রেন্ডার করে
+ * @param {Array} tasks মিশনগুলির তালিকা
+ */
+function processAndRenderTasks(tasks) {
+    const activeContainer = document.getElementById('taskListContainer'); 
+    const missionsTitle = document.getElementById('missionsSectionTitle'); 
+    const completedContainer = document.getElementById('completedListContainer'); 
+    const completedTitle = document.getElementById('completedMissionsTitle');
+
+    tasks.sort((a, b) => {
+        const aIndex = a.orderIndex !== undefined && a.orderIndex !== null ? a.orderIndex : Infinity;
+        const bIndex = b.orderIndex !== undefined && b.orderIndex !== null ? b.orderIndex : Infinity;
+
+        if (aIndex !== Infinity && bIndex !== Infinity) {
+            return aIndex - bIndex; 
+        }
+        if (aIndex !== Infinity) return -1; 
+        if (bIndex !== Infinity) return 1;  
+
+        return (b.created_at || 0) - (a.created_at || 0);
+    });
+
+    let activeHtml = '', completedHtml = '';
+    
+    document.querySelectorAll('[id^="reset-timer-"]').forEach(el => {
+        if (el.taskInterval) clearInterval(el.taskInterval);
+    });
+
+    tasks.forEach(task => {
+        const isCompleted = completedTasks.includes(task.id);
+        const taskWaitTime = task.waitTime || 5; 
+        
+        const isRepeating = task.isDailyRepeating || false;
+        const lastClaimedDateStr = claimedDailyTasks[task.id]; 
+
+        let isClaimedToday = false;
+        let resetTimeMs = 0;
+        if (isRepeating && lastClaimedDateStr) {
+            const todayDateString = new Date().toDateString(); 
+            
+            if (lastClaimedDateStr === todayDateString) { 
+                isClaimedToday = true;
+                // Next reset is midnight, the start of the next day.
+                const nextDay = new Date(new Date().setHours(24, 0, 0, 0));
+                resetTimeMs = nextDay.getTime();
+            }
+        }
+        
+        const keepLink = task.keepLinkOnComplete || false; 
+        
+        let iconClass = task.type === 'telegram' ? 'fab fa-telegram-plane' : (task.type === 'youtube' ? 'fab fa-youtube' : 'fas fa-globe');
+        
+        let isDisabled = false;
+        let btnClass = 'cyber-btn-small';
+        let btnText = 'START';
+        let btnAction = `startTask('${task.id}', '${task.link}', ${task.reward}, ${taskWaitTime}, ${isRepeating})`;
+        
+        if (isRepeating && isClaimedToday) {
+            isDisabled = true;
+            btnClass = 'cyber-btn-small disabled';
+            btnText = 'RESETTING';
+            btnAction = 'void(0)';
+        } else if (isCompleted && !isRepeating) {
+            if (keepLink) {
+                btnText = 'VISIT';
+                btnClass = 'cyber-btn-small btn-visit'; 
+                btnAction = `window.open('${task.link}', '_blank');`;
+                isDisabled = false; 
+            } else {
+                isDisabled = true;
+                btnClass = 'cyber-btn-small disabled';
+                btnText = 'LOGGED';
+                btnAction = 'void(0)';
+            }
+        }
+        
+        const cardHtml = `
+        <div class="mission-capsule">
+            <div class="capsule-left">
+                <div class="capsule-icon"><i class="${iconClass}"></i></div>
+                <div class="capsule-info">
+                    <h4>${task.title}</h4>
+                    <p>Bounty: ${task.reward} Coins</p>
+                    <p id="reset-timer-${task.id}" class="neon-text" style="margin-top: 5px; font-size: 0.8rem; display: ${isClaimedToday ? 'block' : 'none'};">
+                        ${isClaimedToday ? 'Resetting...' : ''}
+                    </p>
+                </div>
+            </div>
+            <button id="btn-${task.id}" class="${btnClass}" onclick="${btnAction}" ${isDisabled ? 'disabled' : ''}>${btnText}</button>
+        </div>`;
+        
+        if (!isCompleted || isRepeating) activeHtml += cardHtml; 
+        else completedHtml += cardHtml;
+        
+        if (isClaimedToday) {
+            setTimeout(() => {
+                if(document.getElementById(`reset-timer-${task.id}`)) {
+                    startDailyTaskCountdown(task.id, resetTimeMs);
+                }
+            }, 100);
+        }
+    });
+
+    if (activeHtml === '') {
+        activeContainer.innerHTML = '<div style="text-align:center; padding: 40px; color: #8b9bb4;"><i class="fas fa-tasks fa-2x"></i><p>No active missions found.</p></div>'; 
+        missionsTitle.innerHTML = 'Active Missions <div class="line"></div>';
+    } else {
+        activeContainer.innerHTML = activeHtml;
+        missionsTitle.innerHTML = 'Active Missions <div class="line"></div>';
+    }
+    completedContainer.innerHTML = completedHtml; 
+    completedTitle.style.display = completedHtml ? 'flex' : 'none';
+    completedTitle.innerHTML = 'Completed Logs <div class="line"></div>';
+}
+
+function renderTasks(forceLoad = false) {
+    const activeContainer = document.getElementById('taskListContainer');
+    const CACHE_KEY = 'tasks_list';
+    
+    // ১. ক্যাশ চেক করা হচ্ছে (এডমিন আপডেটের টাইমস্ট্যাম্প সহ)
+    const cachedData = getCache(CACHE_KEY, settings.tasks_last_updated);
+    if (cachedData && !forceLoad) {
+        // ক্যাশ থেকে ডেটা লোড করে রেন্ডার
+        processAndRenderTasks(cachedData);
+        return;
+    }
+
+    activeContainer.innerHTML = `<div class="loading-holo"><div class="scanner"></div><p>Scanning for missions...</p></div>`;
+
+    // ২. Firebase থেকে লোড
+    db.collection('tasks').where('active', '==', true).get().then(snapshot => {
+        let tasks = [];
+        snapshot.forEach(doc => tasks.push({id: doc.id, ...doc.data()}));
+        
+        // ৩. ক্যাশে সেট করা হচ্ছে
+        setCache(CACHE_KEY, tasks);
+        
+        // ৪. রেন্ডার
+        processAndRenderTasks(tasks);
+    });
+}
+
+function startTask(id, link, reward, waitTime = 5, isRepeating = false) { 
+// ... (rest of the function remains the same)
+    if (activeTaskTimeout) {
+        return showErrorModal('FIELD MISSION', 'Another mission is in progress. Please complete it first.', 'clock');
+    }
+    
+    window.open(link, '_blank'); 
+    
+    const btn = document.getElementById(`btn-${id}`);
+    
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; 
+    btn.disabled = true; 
+
+    const actualWaitTime = waitTime > 0 ? waitTime : 5; 
+    const totalWaitTimeMs = actualWaitTime * 1000 + 1500;
+
+    activeMissionId = id; 
+    
+    activeTaskTimeout = setTimeout(() => { 
+        
+        activeTaskTimeout = null; 
+        activeMissionId = null; 
+        
+        if (isRepeating) {
+             const lastClaimedDate = claimedDailyTasks[id];
+             if (lastClaimedDate && new Date(lastClaimedDate).toDateString() === new Date().toDateString()) {
+                 btn.innerHTML = 'RESETTING'; 
+                 btn.className = 'cyber-btn-small disabled'; 
+                 return;
+             }
+        } 
+        else if (completedTasks.includes(id)) { 
+            btn.innerHTML = 'LOGGED'; 
+            btn.className = 'cyber-btn-small disabled'; 
+            return; 
+        } 
+        
+        btn.innerHTML = 'CLAIM'; 
+        btn.disabled = false; 
+        
+        btn.classList.add('btn-claim');
+        
+        btn.onclick = function() { 
+            showRewardModal('mission', reward, id, null, btn, isRepeating);
+        }; 
+        
+    }, totalWaitTimeMs);
+}
+
+function stopMissionTimer(showError = false) {
+// ... (rest of the function remains the same)
+     if (activeTaskTimeout) {
+        
+        clearTimeout(activeTaskTimeout);
+        activeTaskTimeout = null;
+        
+        if (showError) { 
+            const errorDesc = `Mission timer was interrupted. Please start again.`;
+            showErrorModal('FIELD MISSION', errorDesc, 'clock');
+            
+            const btn = document.getElementById(`btn-${activeMissionId}`);
+            if(btn) {
+                btn.innerHTML = 'START';
+                btn.classList.remove('disabled', 'btn-claim');
+                btn.disabled = false; 
+            }
+        }
+        
+        activeMissionId = null;
+    }
+}
+
+function startAdFlow() { 
+// ... (rest of the function remains the same)
+    const now = Date.now(); 
+    if (now < adCooldownEndTime) { updateUI(); showErrorModal('WAIT', `Cooling down. Try again in ${Math.ceil((adCooldownEndTime - now) / 1000)} seconds.`, 'clock'); return; }
+    if (adsWatchedToday >= settings.daily_limit) return;
+    const adFunc = window[settings.monetag_ad_code]; 
+    if (!adFunc || typeof adFunc !== 'function') { showErrorModal('ERROR', 'Monetag System not ready. Check settings.', 'exclamation-circle'); return; }
+    document.getElementById('adOverlay').style.display = 'flex'; 
+    document.getElementById('watchAdBtn').classList.add('disabled'); 
+    document.getElementById('watchAdBtn').innerHTML = 'CONNECTING...'; 
+
+    adFunc().then(() => { 
+        document.getElementById('adOverlay').style.display = 'none'; 
+        openAdModal('monetag'); 
+    }).catch((e) => { 
+        document.getElementById('adOverlay').style.display = 'none'; 
+        document.getElementById('watchAdBtn').classList.remove('disabled'); 
+        document.getElementById('watchAdBtn').innerHTML = `${settings.ad_btn_text} <span class="flare"></span>`; 
+        showErrorModal('FAILED', 'Connection lost.', 'times-circle'); 
+    });
+}
+
+function startAdsgramFlow() {
+// ... (rest of the function remains the same)
+    const now = Date.now();
+    if (now < adsgramCooldownEndTime) {
+        updateUI();
+        showErrorModal('WAIT', `Cooling down. Try again in ${Math.ceil((adsgramCooldownEndTime - now) / 1000)} seconds.`, 'clock');
+        return;
+    }
+    
+    if (adsgramWatchedToday >= settings.adsgram_daily_limit) return;
+    
+    const blockId = settings.adsgram_block_id || "int-18699";
+    if (!window.Adsgram) {
+        showErrorModal('ERROR', 'Adsgram module missing. Check console.', 'exclamation-circle');
+        return;
+    }
+    
+    const AdController = window.Adsgram.init({ blockId: blockId });
+    document.getElementById('adOverlay').style.display = 'flex';
+    
+    const adStartTime = Date.now();
+    
+    const aBtn = document.getElementById('watchAdsgramBtn');
+    aBtn.classList.add('disabled');
+    aBtn.innerHTML = 'CONNECTING...';
+    
+    const newCooldownEndTime = now + settings.adsgram_cooldown_duration;
+    adsgramCooldownEndTime = newCooldownEndTime;
+    userRef.update({ adsgram_cooldown_end_time: newCooldownEndTime });
+    startAdsgramCooldownTimer(newCooldownEndTime);
+    
+    updateUI();
+    
+    const SAFETY_TIMEOUT_MS = 25000;
+    const cleanupTimeoutId = setTimeout(() => {
+        if (document.getElementById('adOverlay').style.display === 'flex') {
+            document.getElementById('adOverlay').style.display = 'none';
+            showErrorModal('TIMEOUT', 'Ad network failed to load in time. Please try again later.', 'clock');
+            console.error("Adsgram Ad Loading Timed Out.");
+            // Timer already running, no need to re-enable button
+        }
+    }, SAFETY_TIMEOUT_MS);
+    
+    AdController.show().then((result) => {
+        
+        clearTimeout(cleanupTimeoutId);
+        document.getElementById('adOverlay').style.display = 'none';
+        
+        const adDuration = Date.now() - adStartTime;
+        
+        if (adDuration < ADSGRAM_MIN_VIEW_DURATION_MS) {
+            const remainingSeconds = Math.ceil((ADSGRAM_MIN_VIEW_DURATION_MS - adDuration) / 1000);
+            showAdsgramTimerErrorModal(remainingSeconds);
+        } else {
+            openAdModal('adsgram');
+        }
+        
+    }).catch((result) => {
+        clearTimeout(cleanupTimeoutId);
+        document.getElementById('adOverlay').style.display = 'none';
+        
+        showErrorModal('FAILED', 'Link terminated or Ad skipped.', 'times-circle');
+        // Timer already running, no need to re-enable button
+    });
+}
+
+function openAdModal(provider) {
+// ... (rest of the function remains the same)
+    let btnId, reward;
+    if (provider === 'adsgram') {
+        btnId = 'watchAdsgramBtn';
+        reward = settings.adsgram_reward;
+    } else { // monetag
+        btnId = 'watchAdBtn';
+        reward = settings.reward_per_ad;
+    }
+
+    const btn = document.getElementById(btnId);
+    
+    btn.classList.add('disabled'); 
+    btn.innerHTML = 'WAITING...'; 
+
+    showRewardModal('ad', reward, null, provider); 
+}
+
+function executeAdRewardTransaction(amount, provider) {
+// ... (Transaction logic remains the same for correctness)
+    const now = new Date(); 
+    const todayDateKey = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+    const ref = db.collection('users').doc(uid).collection('daily_ads_views').doc(todayDateKey);
+
+    db.runTransaction(async t => { 
+        const dailyDoc = await t.get(ref);
+        const userDoc = await t.get(db.collection('users').doc(uid));
+        if (!userDoc.exists) throw "User not found.";
+        
+        const today = new Date().toDateString();
+
+        const preMonetag = userDoc.data().ads_watched || 0;
+        const preAdsgram = userDoc.data().adsgram_ads_watched || 0;
+        const preTotalAdsWatched = userDoc.data().total_ads_watched || 0;
+
+        let totalDailyAdsIncremented = preMonetag + preAdsgram + 1;
+        let totalAdsWatchedIncremented = preTotalAdsWatched + 1;
+
+        let updateData = {
+            balance: firebase.firestore.FieldValue.increment(amount), 
+            total_ads_watched: firebase.firestore.FieldValue.increment(1), 
+            last_ad_date: today
+        };
+        
+        if (provider === 'adsgram') {
+            updateData.adsgram_ads_watched = firebase.firestore.FieldValue.increment(1);
+            updateData.adsgram_cooldown_end_time = Date.now() + settings.adsgram_cooldown_duration;
+        } else { // monetag
+            updateData.ads_watched = firebase.firestore.FieldValue.increment(1);
+            updateData.ad_cooldown_end_time = Date.now() + settings.monetag_cooldown_duration;
+        }
+
+        t.update(db.collection('users').doc(uid), updateData);
+
+        const dailyData = {
+            total_daily_ads: totalDailyAdsIncremented,
+            count: totalDailyAdsIncremented, 
+            last_reward: amount, 
+            last_provider: provider, 
+            updated_at: Date.now(), 
+            created_at: dailyDoc.exists ? dailyDoc.data().created_at : Date.now()
+        };
+        t.set(ref, dailyData, {merge: true}); 
+
+        if (userDoc.data().referred_by) {
+            const referrerUid = userDoc.data().referred_by;
+            t.update(db.collection('users').doc(referrerUid).collection('referred_users').doc(uid), { referred_total_ads_watched: totalAdsWatchedIncremented });
+        }
+        
+    }).then(() => {
+        if (provider === 'adsgram') adsgramCooldownEndTime = Date.now() + settings.adsgram_cooldown_duration;
+        else if (provider === 'monetag') adCooldownEndTime = Date.now() + settings.monetag_cooldown_duration;
+        updateUI();
+        // Ads history list cache INVALIDATION (User Write)
+        setCache('ads_history', null); 
+    }).catch(err => console.error("Ad log failed: ", err));
+}
+
+function showAdsgramTimerErrorModal(remainingSeconds) {
+// ... (rest of the function remains the same)
+    const modal = document.getElementById('rewardModal');
+    
+    document.getElementById('modalIconContainer').innerHTML = `<div class="modal-main-icon text-red"><i class="fas fa-clock"></i></div>`;
+    
+    document.getElementById('popupAmount').style.display = 'none'; 
+    
+    const titleEl = modal.querySelector('.reward-title');
+    titleEl.innerText = "Reward Missed!";
+    titleEl.className = 'reward-title text-red';
+
+    const remainingText = remainingSeconds === 1 ? '1 Second' : `${remainingSeconds} Seconds`;
+    const desc = `The ad was closed (${remainingText}) early. Complete the full ad to earn rewards.`;
+
+    modal.querySelector('.reward-desc').innerHTML = desc; 
+    modal.style.display = 'flex';
+    
+    const btn = document.getElementById('modalClaimBtn');
+    btn.innerText = settings.error_modal_btn_text; 
+    btn.onclick = () => { 
+        modal.style.display = 'none'; 
+    };
+    
+    const aBtn = document.getElementById('watchAdsgramBtn');
+    aBtn.classList.remove('disabled');
+    aBtn.innerHTML = `${settings.adsgram_btn_text} <span class="flare"></span>`;
+}
+
+function showErrorModal(title, desc, iconName) {
+// ... (rest of the function remains the same)
+    const modal = document.getElementById('rewardModal');
+    
+    document.getElementById('modalIconContainer').innerHTML = `<div class="modal-main-icon text-red"><i class="fas fa-${iconName}"></i></div>`;
+    
+    document.getElementById('popupAmount').style.display = 'none'; 
+    
+    const titleEl = modal.querySelector('.reward-title');
+    titleEl.innerText = title;
+    titleEl.className = 'reward-title text-red';
+
+    modal.querySelector('.reward-desc').innerHTML = desc; 
+    modal.style.display = 'flex';
+    
+    const btn = document.getElementById('modalClaimBtn');
+    btn.innerText = settings.error_modal_btn_text; 
+    btn.onclick = () => modal.style.display = 'none';
+}
+
+function showCustomSuccessModal(title, desc, iconName) {
+// ... (rest of the function remains the same)
+    const modal = document.getElementById('statusModal'); 
+    
+    document.getElementById('statusIconContainer').innerHTML = `<div class="modal-main-icon" style="color:#2ecc71; text-shadow: 0 0 15px rgba(46, 204, 113, 0.6);"><i class="fas fa-${iconName}"></i></div>`;
+    
+    const titleEl = document.getElementById('statusTitle');
+    titleEl.innerText = title; 
+    titleEl.style.color = '#2ecc71';
+    titleEl.className = 'reward-title text-cyan';
+
+    document.getElementById('statusDesc').innerText = desc;
+    
+    const btn = document.getElementById('statusBtn'); 
+    btn.innerText = settings.withdraw_success_btn_text;
+    btn.className = 'cyber-btn-small btn-claim';
+    
+    btn.onclick = function() { 
+        modal.style.display = 'none'; 
+    }; 
+    
+    modal.style.display = 'flex';
+}
+
+function showRewardModal(type, amount, id, provider = null, taskButtonEl = null, isRepeating = false) { 
+    let title = settings.ad_popup_title;
+    let desc = settings.ad_popup_desc;
+    
+    if (type === 'daily') {
+        title = settings.daily_popup_title;
+        desc = settings.daily_popup_desc;
+    }
+    else if (type === 'mission') {
+        title = settings.mission_popup_title;
+        desc = settings.mission_popup_desc;
+    }
+    else if (type === 'referral') {
+        title = 'BONUS CLAIMED';
+        desc = 'Referral bounty processing.';
+    }
+    
+    const modal = document.getElementById('rewardModal');
+    
+    const iconContainer = document.getElementById('modalIconContainer');
+    iconContainer.innerHTML = `<div class="modal-main-icon text-gold"><i class="fas fa-coins"></i></div>`;
+    
+    const titleEl = modal.querySelector('.reward-title');
+    titleEl.innerText = title;
+    titleEl.className = 'reward-title text-cyan';
+    
+    modal.querySelector('.reward-desc').innerText = desc;
+    
+    const amountEl = document.getElementById('popupAmount');
+    amountEl.innerText = '+' + amount;
+    amountEl.style.display = 'block';
+    amountEl.className = 'reward-amount-text text-gold';
+    
+    modal.style.display = 'flex';
+    
+    const btn = document.getElementById('modalClaimBtn');
+    btn.onclick = null;
+    btn.innerText = settings.modal_claim_btn_text;
+    
+    btn.onclick = function(e) {
+        modal.style.display = 'none';
+        
+        const newBalanceVisual = currentBalance + amount;
+        
+        spawnFlyingCoins(e, () => {
+            animateBalance(currentBalance, newBalanceVisual);
+            
+            if (type === 'ad') { executeAdRewardTransaction(amount, provider); }
+            else if (type === 'mission') {
+                const updateData = {
+                    balance: firebase.firestore.FieldValue.increment(amount),
+                };
+                
+                if (isRepeating) {
+                    const todayDate = new Date().toDateString();
+                    updateData['claimed_daily_tasks.' + id] = todayDate;
+                    claimedDailyTasks[id] = todayDate; 
+                } else {
+                    updateData.completed_tasks = firebase.firestore.FieldValue.arrayUnion(id);
+                }
+                
+                userRef.update(updateData).then(() => {
+                    // Mission List Cache INVALIDATION (User Write)
+                    setCache('tasks_list', null); 
+                    renderTasks(true); // Force load mission list to reflect completion
+                });
+            }
+            else if (type === 'daily') {
+                const today = new Date().toDateString();
+                userRef.update({ balance: firebase.firestore.FieldValue.increment(amount), last_daily_claim_date: today }).then(() => {
+                    if (window.dailyClaimButtonRef) {
+                        window.dailyClaimButtonRef.innerText = 'LOGGED';
+                        window.dailyClaimButtonRef.className = 'cyber-btn-small disabled';
+                        window.dailyClaimButtonRef.disabled = true;
+                        lastDailyClaimDate = today;
+                        delete window.dailyClaimButtonRef;
+                    }
+                });
+            }
+            else if (type === 'referral') { processReferralClaimTransaction(window.referredIdToClaim, window.rewardAmountToClaim); }
+        });
+    };
+}
+
+async function processReferralClaimTransaction(referredUid, amount) {
+// ... (Transaction logic remains the same for correctness)
+    const btn = document.getElementById(`ref-btn-${referredUid}`);
+    const refUserRef = db.collection('users').doc(uid).collection('referred_users').doc(referredUid);
+    try {
+        await db.runTransaction(async t => {
+            const userDoc = await t.get(userRef); const refDoc = await t.get(refUserRef);
+            if (!userDoc.exists || !refDoc.exists) throw "User or Referral record not found.";
+            if (refDoc.data().is_claimed) throw "Bonus already claimed.";
+            if ((refDoc.data().referred_total_ads_watched || 0) < settings.ref_ads_watch_requirement) throw "Req not met.";
+            t.update(userRef, { balance: firebase.firestore.FieldValue.increment(amount), referral_earnings: firebase.firestore.FieldValue.increment(amount) });
+            t.update(refUserRef, { is_claimed: true, claimed_at: Date.now() });
+            return amount; 
+        });
+        // Referral List Cache INVALIDATION (User Write)
+        setCache('referrals_list', null); 
+        renderReferrals(activeRefPage, true); // Force load referral list to reflect claim
+    } catch (error) {
+        console.error("Referral Claim Failed: ", error);
+        const errMsg = (typeof error === 'string') ? error : "System Error.";
+        if (btn && errMsg !== "Bonus already claimed.") { btn.innerHTML = 'CLAIM'; btn.classList.remove('disabled'); btn.disabled = false; }
+        showErrorModal('FAILED', errMsg, 'exclamation-triangle');
+    }
+    window.referredIdToClaim = null; window.rewardAmountToClaim = null; 
+}
+
+async function claimReferralBonus(referredUid, amount) {
+// ... (rest of the function remains the same)
+    const btn = document.getElementById(`ref-btn-${referredUid}`); btn.innerHTML = '...'; btn.disabled = true;
+    const refDoc = await db.collection('users').doc(uid).collection('referred_users').doc(referredUid).get();
+    if (!refDoc.exists || refDoc.data().is_claimed || (refDoc.data().referred_total_ads_watched || 0) < settings.ref_ads_watch_requirement) {
+         btn.innerHTML = 'PENDING'; btn.classList.add('disabled'); btn.disabled = true;
+         showErrorModal('ACCESS DENIED', 'Referral must view more ads.', 'hand-point-up'); return; 
+    }
+    window.referredIdToClaim = referredUid; window.rewardAmountToClaim = amount; showRewardModal('referral', amount, referredUid); 
+}
+
+function renderReferrals(page = 1, forceLoad = false) {
+    const activeContainer = document.getElementById('activeReferralListContainer');
+    const CACHE_KEY = 'referrals_list';
+    
+    // ১. ক্যাশ চেক করা হচ্ছে (রেফারেল লিস্টের জন্য এডমিন টাইমস্ট্যাম্প প্রয়োজন নেই, শুধু ইউজার ইনভ্যালিডেশন যথেষ্ট)
+    const cachedData = getCache(CACHE_KEY, 0); // 0 means no Firebase timestamp check
+    if (cachedData && !forceLoad) {
+        // ক্যাশ থেকে ডেটা লোড করে রেন্ডার
+        activeReferralsData = cachedData.referrals.filter(r => !r.is_claimed);
+        activeReferralsData.sort((a, b) => (b.referred_total_ads_watched || 0) - (a.referred_total_ads_watched || 0));
+        activeRefPage = page;
+        updateReferralList(activeReferralsData, activeRefPage, 'active');
+        return;
+    }
+    
+    activeContainer.innerHTML = `<div class="loading-holo"><div class="scanner"></div><p>Syncing Agent List...</p></div>`;
+
+    // ২. Firebase থেকে লোড
+    db.collection('users').doc(uid).collection('referred_users').get().then(async snapshot => {
+        const referrals = []; const reqs = [];
+        snapshot.forEach(doc => {
+            const d = doc.data();
+            // ... (data fetching logic to get username/ad count)
+            reqs.push(db.collection('users').doc(d.referred_uid).get().then(refUserDoc => {
+                const userName = d.referred_username || (refUserDoc.exists ? (refUserDoc.data().full_name || 'Agent') : 'Agent'); 
+                const totalAds = refUserDoc.exists ? (refUserDoc.data().total_ads_watched || 0) : (d.referred_total_ads_watched || 0);
+                referrals.push({ ...d, id: doc.id, referred_username: userName, referred_total_ads_watched: totalAds });
+            }).catch(() => { referrals.push({ ...d, id: doc.id, referred_total_ads_watched: d.referred_total_ads_watched || 0 }); }));
+        });
+        
+        await Promise.all(reqs);
+        
+        // ৩. ক্যাশে সেট করা হচ্ছে
+        setCache(CACHE_KEY, { referrals: referrals }); 
+        
+        // ৪. রেন্ডার
+        activeReferralsData = referrals.filter(r => !r.is_claimed);
+        activeReferralsData.sort((a, b) => (b.referred_total_ads_watched || 0) - (a.referred_total_ads_watched || 0));
+        activeRefPage = page;
+        updateReferralList(activeReferralsData, activeRefPage, 'active'); 
+    });
+}
+
+function updateReferralList(data, page, type) {
+// ... (rest of the function remains the same)
+    const container = document.getElementById(`${type}ReferralListContainer`); 
+    const titleEl = document.getElementById(`${type}ReferralsTitle`); 
+    const paginationEl = document.getElementById(`${type}ReferralPagination`);
+    
+    const start = (page - 1) * pageSize; 
+    const end = start + pageSize; 
+    const paginatedData = data.slice(start, end); 
+    const totalPages = Math.ceil(data.length / pageSize); 
+    const refReq = settings.ref_ads_watch_requirement || 100;
+    
+    titleEl.style.display = data.length > 0 ? 'flex' : 'none';
+    if (data.length === 0) { 
+        container.innerHTML = `<div style="text-align:center; padding: 40px; color: #8b9bb4;"><i class="fas fa-user-slash fa-2x"></i><p>No active agents found.</p></div>`;
+        paginationEl.style.display = 'none'; 
+        return; 
+    }
+    
+    let html = '';
+    paginatedData.forEach(r => {
+        const adsWatched = r.referred_total_ads_watched || 0; 
+        const cappedAdsWatched = Math.min(adsWatched, refReq); 
+        const isReadyToClaim = adsWatched >= refReq; 
+        const progressText = `${cappedAdsWatched}/${refReq}`; 
+        const progressColor = isReadyToClaim ? '#00f0ff' : '#bc13fe';
+        let btnClass = 'cyber-btn-small disabled', btnText = 'PENDING', btnAction = 'void(0)', btnDisabled = true;
+        
+        if (r.is_claimed) { btnText = 'CLAIMED'; btnClass = 'cyber-btn-small disabled'; btnDisabled = true; } 
+        else if (isReadyToClaim) { btnText = 'CLAIM'; btnClass = 'cyber-btn-small'; btnAction = `claimReferralBonus('${r.id}', ${settings.ref_bonus})`; btnDisabled = false; }
+        
+        html += `
+        <div class="mission-capsule">
+            <div class="capsule-left">
+                <div class="capsule-icon"><i class="fas fa-user-secret"></i></div>
+                <div class="capsule-info">
+                    <h4>${r.referred_username}</h4>
+                    <p style="color:${progressColor}">Progress: ${progressText} Ads</p>
+                </div>
+            </div>
+            <button id="ref-btn-${r.id}" class="${btnClass}" onclick="${btnAction}" ${btnDisabled ? 'disabled' : ''}>${btnText}</button>
+        </div>`;
+    });
+    container.innerHTML = html;
+    
+    paginationEl.innerHTML = '';
+    
+    if (totalPages > 1) {
+        const prevBtn = `<button class="page-btn" onclick="changeRefPage('${type}', ${page - 1})" ${page === 1 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`;
+        const nextBtn = `<button class="page-btn" onclick="changeRefPage('${type}', ${page + 1})" ${page === totalPages ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
+        
+        let pageNumbers = '';
+
+        function createPageButton(p) {
+            return `<button class="page-btn ${p === page ? 'active' : ''}" onclick="changeRefPage('${type}', ${p})">${p}</button>`;
+        }
+
+        function createEllipsis() {
+            return `<span class="page-btn disabled" style="cursor:default; background:none; border:none; box-shadow:none; color:var(--text-muted); padding: 8px 0;">...</span>`;
+        }
+        
+        for (let i = 1; i <= Math.min(3, totalPages); i++) {
+            pageNumbers += createPageButton(i);
+        }
+
+        if (totalPages > 3) {
+            const showCurrentPage = page > 3 && page < totalPages;
+            if (page > 4) { 
+                pageNumbers += createEllipsis();
+            } else if (page === 4 && totalPages > 4) { }
+            if (showCurrentPage) {
+                pageNumbers += createPageButton(page);
+            }
+            if (page < totalPages - 1 && page > 3 && totalPages > 4) {
+                pageNumbers += createEllipsis();
+            } else if (page === 3 && totalPages > 4) {
+                 pageNumbers += createEllipsis();
+            }
+            if (page !== totalPages) {
+                if (page === totalPages - 1) {
+                    pageNumbers += createPageButton(totalPages);
+                } 
+                else if (showCurrentPage) {
+                    pageNumbers += createPageButton(totalPages);
+                }
+                else if (page <= 3) {
+                    pageNumbers += createPageButton(totalPages);
+                }
+                 else if (page === 4 && totalPages > 4) {
+                    pageNumbers += createPageButton(totalPages);
+                 }
+            }
+        }
+        
+        paginationEl.innerHTML = prevBtn + pageNumbers + nextBtn; 
+        paginationEl.style.display = 'flex';
+    } else { 
+        paginationEl.style.display = 'none'; 
+    }
+}
+
+function changeRefPage(type, newPage) { 
+// ... (rest of the function remains the same)
+    if (type === 'active') { 
+        activeRefPage = newPage; 
+        updateReferralList(activeReferralsData, activeRefPage, 'active'); 
+    } 
+}
+
+function openNetworkSelectionModal() {
+// ... (rest of the function remains the same)
+    const modal = document.getElementById('networkSelectionModal');
+    populateWithdrawMethods(settings.pay_methods);
+    
+    modal.style.display = 'flex';
+    
+    const triggerIcon = document.getElementById('triggerIcon');
+    triggerIcon.classList.add('fa-rotate-180'); 
+}
+
+function closeNetworkSelectionModal() {
+// ... (rest of the function remains the same)
+    const modal = document.getElementById('networkSelectionModal');
+    modal.style.display = 'none';
+    
+    const triggerIcon = document.getElementById('triggerIcon');
+    triggerIcon.classList.remove('fa-rotate-180');
+}
+
+function selectNetwork(el, name, value, placeholder) {
+// ... (rest of the function remains the same)
+    const container = document.getElementById('networkOptionsContainer');
+    const selectedTextEl = document.getElementById('selectedNetworkText');
+    const hiddenInput = document.getElementById('withdrawMethodValue');
+
+    container.querySelectorAll('.network-option-capsule').forEach(capsule => {
+        capsule.classList.remove('selected');
+    });
+
+    el.classList.add('selected');
+    
+    selectedWithdrawalMethod = { name: name, placeholder: placeholder };
+    selectedMethodValue = value;
+
+    selectedTextEl.innerText = name;
+    hiddenInput.value = value;
+    
+    toggleAccountInput(placeholder);
+
+    closeNetworkSelectionModal(); 
+}
+
+function toggleAccountInput(placeholderText) { 
+// ... (rest of the function remains the same)
+    const accInputEl = document.getElementById('accountNumber');
+    
+    if (placeholderText) {
+        accInputEl.placeholder = placeholderText;
+        accInputEl.style.display = 'block';
+    } else {
+        accInputEl.style.display = 'none';
+        accInputEl.placeholder = 'Wallet Address / Number'; 
+    }
+}
+
+function requestWithdraw() {
+// ... (rest of the function remains the same)
+    const method = document.getElementById('withdrawMethodValue').value; 
+    const accNum = document.getElementById('accountNumber').value.trim();
+    const amount = parseInt(document.getElementById('withdrawAmount').value), minWithdraw = settings.min_withdraw; 
+    if (totalAdsWatched < settings.min_ads_view_for_withdraw) return showErrorModal(settings.min_ads_err_title, settings.min_ads_err_desc.replace('{{min_ads_view}}', settings.min_ads_view_for_withdraw), 'video');
+    if (referralCount < settings.min_referrals_for_withdraw) return showErrorModal(settings.min_refs_err_title, settings.min_refs_err_desc.replace('{{min_referrals}}', settings.min_referrals_for_withdraw), 'user-plus');
+    if (isNaN(amount) || amount <= 0) return showErrorModal(settings.min_amt_err_title, settings.min_amt_err_desc.replace('{{min_withdraw}}', minWithdraw), 'ban');
+    if (amount < minWithdraw) return showErrorModal(settings.min_amt_err_title, settings.min_amt_err_desc.replace('{{min_withdraw}}', minWithdraw), 'hand-point-up');
+    if (amount > currentBalance) return showErrorModal(settings.bal_err_title, settings.bal_err_desc, 'wallet');
+    if (!method) return showErrorModal(settings.method_err_title, settings.method_err_desc, 'credit-card');
+    if (!accNum) return showErrorModal(settings.acc_num_err_title, settings.acc_num_err_desc, 'user-circle');
+    
+    userRef.update({ balance: firebase.firestore.FieldValue.increment(-amount) }).then(() => {
+        
+        db.collection('withdrawals').add({ user_id: uid, username: username, method: method, account_number: accNum, amount: amount, status: 'pending', date: Date.now() })
+        .then(() => { 
+            showCustomSuccessModal(settings.withdraw_success_title, settings.withdraw_success_desc, 'check-circle'); 
+            
+            document.getElementById('withdrawAmount').value = ''; 
+            document.getElementById('accountNumber').value = ''; 
+            
+            document.getElementById('withdrawMethodValue').value = ''; 
+            document.getElementById('selectedNetworkText').innerText = 'Select Withdraw Method'; 
+            selectedMethodValue = '';
+            selectedWithdrawalMethod = null;
+            toggleAccountInput('');
+            
+            // Withdrawal History Cache INVALIDATION (User Write)
+            setCache('withdrawal_history', null); 
+        });
+    }).catch(err => { 
+        showErrorModal("ERROR", "Transaction failed.", 'exclamation-triangle'); 
+    });
+}
+
+function hideHistoryModal() { document.getElementById('historyModal').style.display = 'none'; }
+function showHistoryModal(type) {
+     if (!uid) return; const modal = document.getElementById('historyModal'); 
+     document.getElementById('historyListContainer').innerHTML = `<div class="loading-holo"><div class="scanner"></div><p>Fetching Data...</p></div>`;
+    if (type === 'withdrawal') { fetchWithdrawalHistory(); } 
+    modal.style.display = 'flex'; logUserEntryActivity(); 
+}
+function showAdsHistoryModal() {
+    if (!uid) return; const modal = document.getElementById('historyModal'); document.getElementById('historyListContainer').innerHTML = `<div class="loading-holo"><div class="scanner"></div><p>Fetching Logs...</p></div>`; 
+    modal.style.display = 'flex'; fetchAdsHistory(); logUserEntryActivity(); 
+}
+
+function fetchWithdrawalHistory(forceLoad = false) {
+    if (!uid) return; 
+    
+    const CACHE_KEY = 'withdrawal_history';
+    const container = document.getElementById('historyListContainer');
+    
+    // ১. ক্যাশ চেক করা হচ্ছে (হিস্টরির জন্য এডমিন টাইমস্ট্যাম্প প্রয়োজন নেই)
+    const cachedData = getCache(CACHE_KEY, 0); 
+    if (cachedData && !forceLoad) {
+        container.innerHTML = cachedData.html;
+        return;
+    }
+    
+    container.innerHTML = `<div class="loading-holo"><div class="scanner"></div><p>Fetching Data...</p></div>`;
+
+    // ২. Firebase থেকে লোড
+    db.collection('withdrawals').where('user_id', '==', uid).orderBy('date', 'desc').get().then(snapshot => {
+        let html = ''; 
+        
+        if (snapshot.empty) {
+            html = `<div style="text-align:center; padding: 30px; color: #8b9bb4;">
+                        <i class="fas fa-box-open fa-2x"></i>
+                        <p>No records found.</p>
+                    </div>`;
+        } else {
+            snapshot.forEach(doc => { 
+                const item = doc.data(); 
+                const date = item.date ? new Date(item.date).toLocaleDateString() : 'N/A'; 
+                const accNum = item.account_number || '';
+
+                let styleOverride = ''; 
+                
+                const statusText = item.status ? item.status.toLowerCase() : 'pending';
+
+                if (statusText === 'rejected' || statusText === 'declined' || statusText === 'cancel') {
+                    styleOverride = 'background: rgba(255, 77, 77, 0.15); color: #ff4d4d;';
+                } else if (statusText === 'pending') {
+                    styleOverride = 'background: rgba(255, 215, 0, 0.1); color: #ffd700;';
+                }
+                
+                const displayStatus = item.status ? item.status.toUpperCase() : 'PENDING';
+
+                html += `
+                <div class="mission-capsule">
+                    <div class="capsule-left" style="align-items:flex-start;">
+                        <div class="capsule-info">
+                            <h4 style="color:#00f0ff; margin-bottom: 3px;">${item.amount} Coins</h4>
+                            <p style="margin: 0; color: #e0e0e0; font-size: 0.8rem;">
+                                ${item.method} | <span style="color: #bc13fe;">${accNum}</span>
+                            </p>
+                            <p style="margin: 2px 0 0 0; font-size: 0.7rem; color: #6c7a89;">
+                                ${date}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="ref-count-pill" style="align-self: center; min-width: 70px; ${styleOverride}">
+                        ${displayStatus}
+                    </div>
+                </div>`; 
+            });
+        }
+        
+        // ৩. ক্যাশে সেট করা হচ্ছে
+        setCache(CACHE_KEY, { html: html });
+        
+        // ৪. রেন্ডার
+        container.innerHTML = html;
+        
+    }).catch(err => {
+        document.getElementById('historyListContainer').innerHTML = `<div style="text-align:center; padding: 30px; color: #ff4d4d;">Failed to load logs.</div>`;
+    });
+}
+
+function fetchAdsHistory(forceLoad = false) {
+    if (!uid) return;
+    
+    const CACHE_KEY = 'ads_history';
+    const container = document.getElementById('historyListContainer');
+    
+    // ১. ক্যাশ চেক করা হচ্ছে (হিস্টরির জন্য এডমিন টাইমস্ট্যাম্প প্রয়োজন নেই)
+    const cachedData = getCache(CACHE_KEY, 0);
+    if (cachedData && !forceLoad) {
+        container.innerHTML = cachedData.html;
+        return;
+    }
+    
+    container.innerHTML = `<div class="loading-holo"><div class="scanner"></div><p>Fetching Logs...</p></div>`;
+    
+    // ২. Firebase থেকে লোড
+    db.collection('users').doc(uid).collection('daily_ads_views')
+    .orderBy('updated_at', 'desc')
+    .limit(7) 
+    .get().then(snapshot => {
+        let html = '';
+        
+        html += `<div class="glass-panel" style="margin-bottom:10px; padding:10px; text-align: center;">
+                    <h4 style="margin:0">LIFETIME ADS Viewed: <span style="color:#00f0ff">${totalAdsWatched}</span></h4>
+                 </div>`;
+        
+        if (snapshot.empty) {
+            html += `<div style="text-align:center; padding: 30px; color: #8b9bb4;">
+                        <i class="fas fa-box-open fa-2x"></i>
+                        <p>No logs found for the last 7 days.</p>
+                     </div>`;
+        } else {
+            snapshot.forEach(doc => { 
+                const item = doc.data(); 
+                
+                const parts = doc.id.split('-'); 
+                const displayDate = new Date(parts[0], parts[1]-1, parts[2]).toLocaleDateString('en-US', {
+                    month: 'short', day: 'numeric', year: 'numeric'
+                }); 
+                
+                let providerName = 'Zone 2';
+                if(item.last_provider === 'adsgram') providerName = 'Zone 1';
+
+                html += `
+                <div class="top-ref-item" style="justify-content:space-between; align-items: center; padding: 12px;">
+                    <div class="ref-info" style="display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
+                        <h4 style="margin: 0; font-size: 0.95rem; color: #fff; line-height: 1.2;">
+                            Daily Ads viewed
+                        </h4>
+                        <p style="margin: 4px 0 0 0; padding: 0; font-size: 0.8rem; color: #8b9bb4; line-height: 1.2;">
+                            Last Ad Zone: <span style="color: #00f0ff; font-weight: bold;">${providerName}</span>
+                        </p>
+                        <p style="margin: 4px 0 0 0; padding: 0; font-size: 0.75rem; color: #6c7a89; line-height: 1.2;">
+                            ${displayDate}
+                        </p>
+                    </div>
+                    <div class="ref-count-pill" style="background: rgba(0, 240, 255, 0.15); color: #00f0ff;">
+                        ${item.count}
+                    </div>
+                </div>`; 
+            });
+        }
+        
+        // ৩. ক্যাশে সেট করা হচ্ছে
+        setCache(CACHE_KEY, { html: html });
+        
+        // ৪. রেন্ডার
+        container.innerHTML = html;
+        
+    }).catch(err => {
+        document.getElementById('historyListContainer').innerHTML = `<div style="text-align:center; padding: 30px; color: #ff4d4d;">Failed to load logs.</div>`;
+    });
+}
+
+function switchTab(id, el) {
+    const isLeavingTasks = document.getElementById('tasks-section').classList.contains('active-section') && id !== 'tasks';
+    
+    if (isLeavingTasks && activeTaskTimeout) {
+        stopMissionTimer(true); 
+    }
+
+    document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active-section')); 
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); 
+    
+    document.getElementById(id+'-section').classList.add('active-section'); 
+    el.classList.add('active');
+    
+    window.scrollTo(0,0); 
+    logUserEntryActivity(); 
+    
+    // forceLoad=false (cache will be used if available and valid)
+    if (id === 'invite') { 
+        activeRefPage = 1; renderReferrals(activeRefPage, false); 
+    } else if (id === 'tasks') {
+        renderTasks(false);
+    } else if (id === 'wallet') {
+        // No heavy loading needed here.
+    }
+    
+    if(document.getElementById('networkSelectionModal').style.display === 'flex') closeNetworkSelectionModal();
+}
+
+function copyLink(btn) { 
+// ... (rest of the function remains the same)
+    navigator.clipboard.writeText(document.getElementById('refLink').innerText).then(() => { 
+        let old = btn.innerHTML; 
+        btn.innerHTML = 'COPIED!'; 
+        btn.style.borderColor = '#2ecc71'; 
+        btn.style.color = '#2ecc71';
+        setTimeout(() => { 
+            btn.innerHTML = old; 
+            btn.style.borderColor = ''; 
+            btn.style.color = '';
+        }, 1000); 
+    }); 
+}
+
+function animateBalance(start, end) { 
+// ... (rest of the function remains the same)
+    const balanceEl = document.getElementById('balance');
+    let current = start;
+    let step = Math.ceil((end - start) / 15);
+    if(step === 0) step = 1;
+
+    balanceEl.classList.add('counting-sparkle');
+
+    const timer = setInterval(() => { 
+        current += step; 
+        if ((step > 0 && current >= end) || (step < 0 && current <= end)) { 
+            current = end; 
+            clearInterval(timer); 
+            
+            balanceEl.classList.remove('counting-sparkle');
+        } 
+        balanceEl.innerText = current; 
+        
+        updateUsdDisplay(current);
+
+    }, 40);
+}
+
+function adjustBalanceFontSize() {
+// ... (rest of the function remains the same)
+    const balanceEl = document.getElementById('balance');
+    if (!balanceEl) return;
+
+    const textLength = balanceEl.innerText.length;
+
+    if (textLength <= 4) {
+        balanceEl.style.fontSize = '2rem';      
+    } else if (textLength <= 6) {
+        balanceEl.style.fontSize = '1.4rem';    
+    } else if (textLength <= 8) {
+        balanceEl.style.fontSize = '1.1rem';    
+    } else if (textLength <= 10) {
+        balanceEl.style.fontSize = '.9rem';    
+    } else if (textLength <= 12) {
+        balanceEl.style.fontSize = '.7rem';    
+    } else if (textLength <= 14) {
+        balanceEl.style.fontSize = '.6rem'; 
+    } else if (textLength <= 16) {
+        balanceEl.style.fontSize = '.5rem'; 
+    } else {
+        balanceEl.style.fontSize = '0.3rem';    
+    }
+}
+
+const balanceObserver = new MutationObserver(adjustBalanceFontSize);
+const balanceNode = document.getElementById('balance');
+
+if (balanceNode) {
+    adjustBalanceFontSize(); 
+    balanceObserver.observe(balanceNode, { childList: true, characterData: true, subtree: true });
+}
+
+
+function adjustRefStatSize(elementId) {
+// ... (rest of the function remains the same)
+    const el = document.getElementById(elementId);
+    if (!el) return;
+
+    const textLength = el.innerText.length;
+
+    if (textLength <= 5) {
+        el.style.fontSize = '1.2rem';      
+    } else if (textLength <= 7) {
+        el.style.fontSize = '1rem';        
+    } else if (textLength <= 9) {
+        el.style.fontSize = '0.8rem';      
+    } else if (textLength <= 12) {
+        el.style.fontSize = '0.7rem';      
+    } else {
+        el.style.fontSize = '0.6rem';      
+    }
+}
+
+function spawnFlyingCoins(e, callback) {
+// ... (rest of the function remains the same)
+    const startX = e.clientX || (e.touches && e.touches[0].clientX) || window.innerWidth / 2;
+    const startY = e.clientY || (e.touches && e.touches[0].clientY) || window.innerHeight / 2;
+
+    const targetEl = document.getElementById('mainCoinIcon'); 
+    if (!targetEl) { if(callback) callback(); return; }
+    
+    const targetRect = targetEl.getBoundingClientRect();
+    const targetX = targetRect.left + (targetRect.width / 4);
+    const targetY = targetRect.top + (targetRect.height / 4);
+
+    const pattern = coinClickCycle % 3;
+    coinClickCycle++;
+
+    const particleCount = 12; 
+    let completedParticles = 0;
+
+    for (let i = 0; i < particleCount; i++) {
+        const coin = document.createElement('div');
+        coin.classList.add('flying-coin');
+        document.body.appendChild(coin);
+
+        const randomOffsetX = (Math.random() - 0.5) * 30;
+        const randomOffsetY = (Math.random() - 0.5) * 30;
+        
+        const sX = startX + randomOffsetX;
+        const sY = startY + randomOffsetY;
+        
+        coin.style.left = `${sX}px`;
+        coin.style.top = `${sY}px`;
+
+        let keyframes = [];
+        const duration = 1000 + Math.random() * 300;
+        
+        if (pattern === 0) { 
+            keyframes = [
+                { transform: `translate(0, 0) scale(0.5)`, opacity: 1 },
+                { transform: `translate(${(targetX - sX)*0.25 + 40}px, ${(targetY - sY)*0.25}px) scale(0.8)`, opacity: 1, offset: 0.25 },
+                { transform: `translate(${(targetX - sX)*0.5 - 40}px, ${(targetY - sY)*0.5}px) scale(1)`, opacity: 1, offset: 0.5 },
+                { transform: `translate(${(targetX - sX)*0.75 + 40}px, ${(targetY - sY)*0.75}px) scale(1.1)`, opacity: 1, offset: 0.75 },
+                { transform: `translate(${targetX - sX}px, ${targetY - sY}px) scale(0.4)`, opacity: 0 }
+            ];
+        } 
+        else if (pattern === 1) { 
+            keyframes = [
+                { transform: `translate(0, 0) scale(0.5)`, opacity: 1 },
+                { transform: `translate(${(targetX - sX)/2 + 150}px, ${(targetY - sY)/2}px) scale(1.2)`, opacity: 1, offset: 0.5 },
+                { transform: `translate(${targetX - sX}px, ${targetY - sY}px) scale(0.4)`, opacity: 0 }
+            ];
+        } 
+        else { 
+            keyframes = [
+                { transform: `translate(0, 0) scale(0.5)`, opacity: 1 },
+                { transform: `translate(${(targetX - sX)/2 - 150}px, ${(targetY - sY)/2}px) scale(1.2)`, opacity: 1, offset: 0.5 },
+                { transform: `translate(${targetX - sX}px, ${targetY - sY}px) scale(0.4)`, opacity: 0 }
+            ];
+        }
+
+        const anim = coin.animate(keyframes, {
+            duration: duration,
+            easing: 'ease-in-out',
+            fill: 'forwards'
+        });
+
+        const trailInterval = setInterval(() => {
+            const rect = coin.getBoundingClientRect();
+            createSmoke(rect.left + 4, rect.top + 4); 
+            if (anim.playState === 'finished') clearInterval(trailInterval);
+        }, 50);
+
+        anim.onfinish = () => {
+            clearInterval(trailInterval);
+            coin.remove();
+            completedParticles++;
+            
+            if (completedParticles === Math.floor(particleCount - 2)) { 
+                triggerBalanceImpact(); 
+            }
+            
+            if (completedParticles === particleCount) {
+                if (callback) callback();
+            }
+        };
+    }
+}
+
+function createSmoke(x, y) {
+// ... (rest of the function remains the same)
+    const smoke = document.createElement('div');
+    smoke.classList.add('neon-smoke');
+    document.body.appendChild(smoke);
+    
+    smoke.style.left = `${x}px`;
+    smoke.style.top = `${y}px`;
+    
+    setTimeout(() => { smoke.remove(); }, 600);
+}
+
+function triggerBalanceImpact() {
+// ... (rest of the function remains the same)
+    const ripple = document.createElement('div');
+    ripple.classList.add('balance-sparkle');
+    document.querySelector('.balance-orbit-container').appendChild(ripple);
+    setTimeout(() => ripple.remove(), 500);
+}
+
+
+function showRejectedWithdrawalModal(data) {
+// ... (rest of the function remains the same)
+    const modal = document.getElementById('rejectedWithdrawalModal');
+    
+    document.getElementById('rejectedTitle').innerText = data.title || 'WITHDRAWAL REJECTED!';
+    document.getElementById('rejectedDesc').innerText = data.desc || 'The amount has been refunded to your balance.';
+    document.getElementById('rejectedRefundAmount').innerText = data.amount || '0';
+    
+    const btn = document.getElementById('rejectedCloseBtn');
+    btn.innerText = data.btn || 'Acknowledge & Close';
+    
+    modal.style.display = 'flex';
+}
+
+function closeRejectedWithdrawalModal() {
+// ... (rest of the function remains the same)
+    const modal = document.getElementById('rejectedWithdrawalModal');
+    
+    modal.style.display = 'none';
+    
+    const navBar = document.querySelector('.cyber-nav');
+    if (navBar) navBar.style.display = 'flex';
+    
+    userRef.update({
+        rejected_popup_data: firebase.firestore.FieldValue.delete(),
+    }).catch(err => {
+        console.error("Failed to clear rejected popup data:", err);
+        modal.style.display = 'flex';
+        alert("System Error! Please refresh. The popup will reappear.");
+    });
+}
+        
+function showWithdrawalRulesModal() {
+// ... (rest of the function remains the same)
+    const modal = document.getElementById('withdrawalRulesModal');
+    const contentEl = document.getElementById('withdrawalRulesContent');
+    
+    let rules = settings.withdrawal_rules_content || '<p>No rules defined by admin.</p>';
+    
+    rules = rules.replace('{{min_withdraw}}', settings.min_withdraw);
+    
+    contentEl.innerHTML = rules;
+    modal.style.display = 'flex';
+}
+
+function hideWithdrawalRulesModal() {
+    document.getElementById('withdrawalRulesModal').style.display = 'none';
+}
+        
+    </script>
+    
+</body>
+</html>
